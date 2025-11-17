@@ -1,0 +1,6 @@
+# eslint 忽略检查 (根据项目需要自行添加)
+build
+src/assets
+public
+dist
+node_modules

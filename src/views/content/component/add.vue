@@ -1,0 +1,121 @@
+<template>
+  <div class="dialog-container">
+    <el-dialog title="添加内容" v-model="isShowDialog" width="500px" :close-on-click-modal="false" :destroy-on-close="true">
+      <el-form ref="dialogFormRef" :model="ruleForm" :rules="rules" size="default" label-width="120px">
+        <el-row :gutter="35">
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="内容名" prop="content">
+              <el-input v-model="ruleForm.content" placeholder="请输入内容名" clearable></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="分权" prop="score">
+              <el-input v-model="ruleForm.score" placeholder="请输入分权" clearable></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="要素" prop="elementId">
+              <el-select v-model="ruleForm.elementId" placeholder="选择要素" clearable>
+                <el-option label="选择要素" :value="0" />
+                <el-option v-for="item in state.kpiList" :label="item.element" :value="item.id" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="onCancel" size="default">取 消</el-button>
+          <el-button type="primary" @click="onSubmit" size="default" :loading="loading">保存</el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive, toRefs, ref } from 'vue'
+import { ElForm, ElMessage } from 'element-plus'
+import { addContent } from '@/api/content/index'
+import { getElementList } from '@/api/element/index'
+
+
+// 定义子组件向父组件传值/事件
+const emit = defineEmits(['refresh'])
+
+function validateKpiId(rule: any, value: any, callback: any) {
+  if(value<=0){
+    callback(new Error('请填写要素'))
+  }else{
+    callback()
+  }
+}
+
+// 定义变量内容
+const dialogFormRef = ref(ElForm)
+const state = reactive({
+  loading: false,
+  ruleForm: {} as any,
+  rules: {
+    elementId:[{ required: true, validator: validateKpiId}]
+  },
+  kpiList:[] as any,
+  isShowDialog: false
+})
+
+const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
+
+const getElement=()=>{
+  getElementList({})
+  .then((data: any) => {
+    state.kpiList=data.data.list
+  })
+  .catch((e) => {
+    console.error(e);
+  })
+}
+
+// 打开弹窗
+const openDialog = (row: any) => {
+  state.isShowDialog = true
+  getElement()
+}
+
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false
+}
+// 取消
+const onCancel = () => {
+  closeDialog()
+}
+
+// 提交
+const onSubmit = () => {
+  dialogFormRef.value.validate((valid: boolean) => {
+    if (valid) {
+      state.loading = true
+      addContent([state.ruleForm])
+        .then(() => {
+          ElMessage({
+            message: '添加成功',
+            type: 'success',
+          })
+          state.loading = false
+          closeDialog()
+          emit('refresh')
+        })
+        .catch(() => {
+          state.loading = false
+        })
+    } else {
+      return false
+    }
+  })
+}
+
+// 暴露变量
+defineExpose({
+  openDialog,
+})
+</script>

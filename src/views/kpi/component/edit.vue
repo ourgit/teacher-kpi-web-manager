@@ -1,0 +1,92 @@
+<template>
+  <div class="dialog-container">
+    <el-dialog title="修改KPI" v-model="isShowDialog" width="500px" :close-on-click-modal="false" :destroy-on-close="true">
+      <el-form ref="dialogFormRef" :model="ruleForm" :rules="rules" size="default" label-width="120px">
+        <el-row :gutter="35">
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="KPI标题" prop="data.title">
+              <el-input v-model="ruleForm.data[0].title" placeholder="请输入KPI标题" clearable></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="onCancel" size="default">取 消</el-button>
+          <el-button type="primary" @click="onSubmit" size="default" :loading="loading">保存</el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive, toRefs, ref } from 'vue'
+import { ElForm, ElMessage } from 'element-plus'
+import { updateKpi } from '@/api/kpi/index'
+
+// 定义子组件向父组件传值/事件
+const emit = defineEmits(['refresh'])
+
+// 定义变量内容
+const dialogFormRef = ref(ElForm)
+const state = reactive({
+  loading: false,
+  ruleForm: {} as any,
+  rules: {
+  },
+  isShowDialog: false,
+  levelList: [] as any,
+})
+
+const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
+
+// 打开弹窗
+const openDialog = (row: any) => {
+  state.isShowDialog = true
+  state.ruleForm = {
+    data:[{
+      id: row.id,
+      title: row.title,
+    }],
+    type:4
+  }
+}
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false
+}
+// 取消
+const onCancel = () => {
+  closeDialog()
+}
+
+// 提交
+const onSubmit = () => {
+  dialogFormRef.value.validate((valid: boolean) => {
+    if (valid) {
+      state.loading = true
+      updateKpi(state.ruleForm)
+        .then(() => {
+          ElMessage({
+            message: '更新成功',
+            type: 'success',
+          })
+          state.loading = false
+          closeDialog()
+          emit('refresh')
+        })
+        .catch(() => {
+          state.loading = false
+        })
+    } else {
+      return false
+    }
+  })
+}
+
+// 暴露变量
+defineExpose({
+  openDialog,
+})
+</script>
