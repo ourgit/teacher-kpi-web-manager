@@ -6,7 +6,7 @@ import request from '@/utils/request'
 export function getActionList(params?: object) {
   return new Promise((resolve) => {
     request({
-      url: '/v1/cp/actions/',
+      url: '/v1/tk/actions/',
       method: 'get',
       params,
     }).then((data) => {
@@ -38,7 +38,7 @@ export function getActionList(params?: object) {
  */
 export function getActionDetail(data: any) {
   return request({
-    url: `/v1/cp/action/${data.id}/`,
+    url: `/v1/tk/action/${data.id}/`,
     method: 'get',
     params: {},
   })
@@ -49,7 +49,7 @@ export function getActionDetail(data: any) {
  */
 export function addAction(data: any) {
   return request({
-    url: '/v1/cp/action/new/',
+    url: '/v1/tk/action/new/',
     method: 'post',
     data,
   })
@@ -60,7 +60,7 @@ export function addAction(data: any) {
  */
 export function updateAction(data: any) {
   return request({
-    url: `/v1/cp/action/${data.id}/`,
+    url: `/v1/tk/action/${data.id}/`,
     method: 'post',
     data,
   })
@@ -71,7 +71,7 @@ export function updateAction(data: any) {
  */
 export function delAction(data: any) {
   return request({
-    url: '/v1/cp/action/',
+    url: '/v1/tk/action/',
     method: 'post',
     data: {
       id: data.id,

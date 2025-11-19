@@ -78,7 +78,7 @@ const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
 const getIndicator=()=>{
   getIndicatorList({})
   .then((data: any) => {
-    state.indicatorList=data.data.list
+    state.indicatorList=data.list
   })
   .catch((e) => {
     console.error(e);

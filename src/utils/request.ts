@@ -37,7 +37,8 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     // 对响应数据做点什么
-    const data = response.data
+    let data = response.data
+    console.log('数据类型:', typeof data);
     console.log('response data:', data)
     //如果请求明确要求返回二进制（responseType 为 arraybuffer/blob），或者返回头是 Excel/stream，则直接返回原始 data
     const respType = (response.config && (response.config as any).responseType) || ''

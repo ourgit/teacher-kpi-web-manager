@@ -5,7 +5,7 @@ import request from '@/utils/request'
  */
 export function getRoleList(params?: object) {
   return request({
-    url: '/v1/cp/groups/',
+    url: '/v1/tk/groups/',
     method: 'get',
     params: params,
   })
@@ -16,7 +16,7 @@ export function getRoleList(params?: object) {
  */
 export function addRole(data: any) {
   return request({
-    url: '/v1/cp/group/new/',
+    url: '/v1/tk/group/new/',
     method: 'post',
     data,
   })
@@ -27,7 +27,7 @@ export function addRole(data: any) {
  */
 export function updateRole(data: any) {
   return request({
-    url: `/v1/cp/group/${data.id}/`,
+    url: `/v1/tk/group/${data.id}/`,
     method: 'post',
     data,
   })
@@ -38,7 +38,7 @@ export function updateRole(data: any) {
  */
 export function delRole(data: any) {
   return request({
-    url: '/v1/cp/group/',
+    url: '/v1/tk/group/',
     method: 'post',
     data: {
       id: data.id,
@@ -52,7 +52,7 @@ export function delRole(data: any) {
  */
 export function getActionByRole(params: any) {
   return request({
-    url: `/v1/cp/actions_by_filter/${params.id}/`,
+    url: `/v1/tk/actions_by_filter/${params.id}/`,
     method: 'get',
     params: {},
   })
@@ -63,7 +63,7 @@ export function getActionByRole(params: any) {
  */
 export function setActionForRole(data: any) {
   return request({
-    url: '/v1/cp/group_action/',
+    url: '/v1/tk/group_action/',
     method: 'post',
     data,
   })
@@ -75,7 +75,7 @@ export function setActionForRole(data: any) {
  */
 export function getMenuByRole(params: any) {
   return request({
-    url: '/v1/cp/group_menu/',
+    url: '/v1/tk/group_menu/',
     method: 'get',
     params
   })
@@ -86,7 +86,7 @@ export function getMenuByRole(params: any) {
  */
 export function setMenuForRole(data: any) {
   return request({
-    url: `/v1/cp/batch_update_menu_to_group/${data.id}/`,
+    url: `/v1/tk/batch_update_menu_to_group/${data.id}/`,
     method: 'post',
     data,
   })

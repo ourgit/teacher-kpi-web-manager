@@ -5,7 +5,7 @@ import request from '@/utils/request'
  */
 export function getConfigList(params?: object) {
   return request({
-    url: '/v1/cp/param_config/',
+    url: '/v1/tk/param_config/',
     method: 'get',
     params: params,
   })
@@ -16,7 +16,7 @@ export function getConfigList(params?: object) {
  */
 export function addConfig(data: any) {
   return request({
-    url: '/v1/cp/param_config/new/',
+    url: '/v1/tk/param_config/new/',
     method: 'post',
     data
   })
@@ -27,7 +27,7 @@ export function addConfig(data: any) {
  */
 export function updateConfig(data: any) {
   return request({
-    url: `/v1/cp/param_config/${data.id}/`,
+    url: `/v1/tk/param_config/${data.id}/`,
     method: 'post',
     data
   })
@@ -39,7 +39,7 @@ export function updateConfig(data: any) {
  */
 export function delConfig(data: any) {
   return request({
-    url: '/v1/cp/param_config/',
+    url: '/v1/tk/param_config/',
     method: 'post',
     data: {
       id: data.id,

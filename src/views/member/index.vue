@@ -21,7 +21,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="queryData.roleId" size="default" placeholder="会员等级" clearable>
+          <el-select v-model="queryData.status" size="default" placeholder="会员等级" clearable>
             <el-option label="全部" :value="0" />
             <el-option label="正常" :value="1" />
             <el-option label="禁用" :value="2" />
@@ -61,21 +61,7 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template #default="{ row }">
-            <el-form>
-              <el-dropdown style="margin-left:10px">
-                <el-button size="small" text type="primary">
-                  更多
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="onDelete(row)">删除</el-dropdown-item>
-                  </el-dropdown-menu>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="exportFile(row)">导出</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </el-form>
+            <el-button size="small" text type="primary" @click="onDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -91,7 +77,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
-import { getRoleList,getMemberList,exportPDF } from '@/api/member/index'
+import { getRoleList,getMemberList } from '@/api/member/index'
 import { storeToRefs } from 'pinia'
 import { useUserInfo } from '@/stores/userInfo'
 const stores = useUserInfo()
@@ -171,17 +157,6 @@ const onOpenAdd=()=>{
 
 const onDelete = (row:any)=>{
     deleteDialogRef.value.openDialog(row)
-}
-
-const exportFile=(row:any)=>{
-  exportPDF({
-    "userId":1,
-    "kpiId":1
-  }).then((data: any) => {
-    console.log("导出成功")
-  }).catch(() => {
-    console.error("导出失败")
-  })
 }
 
 const handleSizeChange = () => {

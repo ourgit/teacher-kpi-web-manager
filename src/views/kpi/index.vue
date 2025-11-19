@@ -26,34 +26,11 @@
       <el-table :data="list" v-loading="loading" style="width: 100%">
         <el-table-column prop="id" label="Id" style="text-align: center;"/>
         <el-table-column prop="title" label="标题" style="text-align: center;"></el-table-column>
-        <!-- <el-table-column label="加入时间" width="180">
-          <template #default="{ row }">
-            {{ formatDate(row.createdTime, 'YYYY-mm-dd HH:MM:SS') }}
-          </template>
-        </el-table-column> -->
         <el-table-column fixed="right" label="操作" style="text-align: center;">
           <template #default="{ row }">
-            <el-form>
-              <!-- <router-link :to="`/member/detail?uid=${row.id}`" class="mr10">
-                <el-button size="small" text type="primary">详情</el-button>
-              </router-link> -->
-              <el-dropdown style="margin-left:10px">
-                <el-button size="small" text type="primary">
-                  更多
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="onOpenEdit(row)">修改</el-dropdown-item>
-                  </el-dropdown-menu>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="onDelete(row)">删除</el-dropdown-item>
-                  </el-dropdown-menu>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="onOpenDispatch(row)">下发</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </el-form>
+            <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
+            <el-button size="small" text type="primary" @click="onDelete(row)">删除</el-button>
+            <el-button size="small" text type="primary" @click="onOpenDispatch(row)">下发</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -72,7 +49,7 @@
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
 import { formatDate } from '@/utils/formatTime'
-import { getKPIList } from '@/api/kpi/index'
+import { getKPIList,getKPIListGet } from '@/api/kpi/index'
 
 
 // 引入组件

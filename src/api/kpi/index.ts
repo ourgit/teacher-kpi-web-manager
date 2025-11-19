@@ -3,10 +3,21 @@ import request from '@/utils/request'
 /**
  * 获取KPI列表
  */
-export function getKPIList(data: object) {
+export function getKPIList(data?: object) {
+  return new Promise((resolve) => {
+    request({
+      url: '/v1/tk/getKpiList/',
+      method: 'post',
+      data,
+    }).then((data)=>{
+      resolve(data)
+    })
+  })
+}
+export function getKPIListGet(data: object) {
   return request({
     url: '/v1/tk/getKpiList/',
-    method: 'post',
+    method: 'get',
     data,
   })
 }

@@ -5,7 +5,7 @@ import request from '@/utils/request'
  */
 export function getMenuList(params?: object) {
   return request({
-    url: '/v1/cp/menu/',
+    url: '/v1/tk/menu/',
     method: 'get',
     params: params,
   })
@@ -16,7 +16,7 @@ export function getMenuList(params?: object) {
  */
 export function addMenu(data: any) {
   return request({
-    url: '/v1/cp/menu/new/',
+    url: '/v1/tk/menu/new/',
     method: 'post',
     data,
   })
@@ -27,7 +27,7 @@ export function addMenu(data: any) {
  */
 export function updateMenu(data: any) {
   return request({
-    url: `/v1/cp/menu/${data.id}/`,
+    url: `/v1/tk/menu/${data.id}/`,
     method: 'post',
     data,
   })
@@ -38,7 +38,7 @@ export function updateMenu(data: any) {
  */
 export function delMenu(data: any) {
   return request({
-    url: '/v1/cp/menu/',
+    url: '/v1/tk/menu/',
     method: 'post', 
     data: {
       id: data.id,
@@ -52,7 +52,7 @@ export function delMenu(data: any) {
  */
 export function getActionByRole(params: any) {
   return request({
-    url: `/v1/cp/actions_by_filter/${params.id}/`,
+    url: `/v1/tk/actions_by_filter/${params.id}/`,
     method: 'get',
     params: {},
   })
@@ -63,7 +63,7 @@ export function getActionByRole(params: any) {
  */
 export function setActionForRole(data: any) {
   return request({
-    url: '/v1/cp/group_action/',
+    url: '/v1/tk/group_action/',
     method: 'post',
     data,
   })

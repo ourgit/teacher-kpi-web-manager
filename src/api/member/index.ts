@@ -206,10 +206,17 @@ export function addLeaderScore(data: any){
   })
 }
 
-export function exportPDF(data: any){
+export function getTeacherList(){
   return request({
-    url: '/v1/tk/export/',
+    url: '/v1/tk/teacher/list/',
+    method: 'post'
+  })
+}
+
+export function getTeacherTaskFile(data: any){
+  return request({
+    url: '/v1/tk/teacher/file/',
     method: 'post',
-    data,
+    data: data
   })
 }
