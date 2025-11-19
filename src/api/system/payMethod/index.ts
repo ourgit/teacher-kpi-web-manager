@@ -6,7 +6,7 @@ import request from '@/utils/request'
 export function getPayMethodList(params?: object) {
   return new Promise((resolve) => {
     request({
-      url: '/v1/cp/pay_method_list/',
+      url: '/v1/tk/pay_method_list/',
       method: 'get',
       params,
     }).then((data) => {
@@ -20,7 +20,7 @@ export function getPayMethodList(params?: object) {
  */
 export function addPayMethod(data: object) {
   return request({
-    url: '/v1/cp/pay_method/new/',
+    url: '/v1/tk/pay_method/new/',
     method: 'post',
     data,
   })
@@ -29,7 +29,7 @@ export function addPayMethod(data: object) {
 //删除支付方式
 export function delPayMethod(data: any) {
   return request({
-    url: '/v1/cp/pay_method/',
+    url: '/v1/tk/pay_method/',
     method: 'post',
     data: {
       id: data.id,

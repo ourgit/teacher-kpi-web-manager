@@ -5,26 +5,17 @@
         <el-form-item label="ID">
           <el-input v-model="queryData.id" size="default" placeholder="请输入ID" clearable/>
         </el-form-item>
-        <el-form-item label="手机号码">
-          <el-input v-model="queryData.phone" size="default" placeholder="请输入手机号" clearable/>
-        </el-form-item>
-        <el-form-item label="用户姓名">
-          <el-input v-model="queryData.userName" size="default" placeholder="请输入用户姓名" clearable/>
-        </el-form-item>
-        <el-form-item label="职业名称">
-          <el-input v-model="queryData.typeName" size="default" placeholder="请输入职业名称" clearable/>
-        </el-form-item>
-        <el-form-item label="角色类型">
-          <el-select v-model="queryData.roleId" size="default" placeholder="会员等级" clearable>
-            <el-option label="全部" :value="0" />
-            <el-option v-for="item in state.roleList" :key="item.id" :label="item.nickName" :value="item.id" />
+        <el-form-item label="状态">
+          <el-select v-model="queryData.status" size="default" placeholder="用户" clearable>
+            <el-option label="全部" value="" />
+            <el-option label="已完成" value="已完成" />
+            <el-option label="待完成" value="待完成" />
           </el-select>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="queryData.roleId" size="default" placeholder="会员等级" clearable>
+        <el-form-item label="上报用户">
+          <el-select v-model="queryData.childId" size="default" placeholder="用户" clearable>
             <el-option label="全部" :value="0" />
-            <el-option label="正常" :value="1" />
-            <el-option label="禁用" :value="2" />
+            <el-option v-for="item in state.userList" :key="item.id" :label="item.userName" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -39,29 +30,14 @@
       <el-table :data="list" v-loading="loading" style="width: 100%">
         <el-table-column prop="id" label="Id" width="120" />
         <el-table-column prop="status" label="状态" show-overflow-tooltip width="130"/>
-        <el-table-column prop="teacherElementScore.score" label="该用户评分的分数" show-overflow-tooltip/>
+        <el-table-column prop="teacherElementScore.score" label="该用户评分分数" show-overflow-tooltip/>
+        <el-table-column prop="teacherElementScore.finalScore" label="最终分数" show-overflow-tooltip/>
         <el-table-column prop="element.element" label="评分要素名称" show-overflow-tooltip/>
         <el-table-column prop="userName" label="上报用户" show-overflow-tooltip/>
         <el-table-column prop="parentName" label="评分用户" show-overflow-tooltip/>
-        <!-- <el-table-column label="用户角色" show-overflow-tooltip width="100">
-          <template #default="{ row }">
-            {{ formatUserType(row.userType) }}
-          </template>
-        </el-table-column> -->
         <el-table-column fixed="right" label="操作" width="100">
           <template #default="{ row }">
-            <el-form>
-              <el-dropdown style="margin-left:10px">
-                <el-button size="small" text type="primary">
-                  更多
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="onAudit(row)">审批</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </el-form>
+            <el-button size="small" text type="primary" @click="onAudit(row)">审批</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -75,7 +51,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
-import { getLeaderTask } from '@/api/member/index'
+import { getLeaderTask,getTeacherList } from '@/api/member/index'
 import { storeToRefs } from 'pinia'
 import { useUserInfo } from '@/stores/userInfo'
 const stores = useUserInfo()
@@ -95,16 +71,28 @@ const state = reactive({
   currentPage: 1,
   totalPage: 1,
   queryData: {
-    
+    id:'',
+    status:'',
+    childId:''
   } as any,
   current:1,
   submitData: {},
   roleList: [] as any,
+  userList: [] as any,
   totalMembers: 0,
   totalBalance: 0
 })
 
 const { list, loading, currentPage, totalPage, queryData, totalMembers, totalBalance } = toRefs(state)
+
+const getListTeacher=()=>{
+  getTeacherList()
+  .then((data: any) =>{
+    state.userList=data.list;
+  }).catch(() => {
+    console.error("获取失败");
+  })
+}
 
 // 获取列表
 const getListData = () => {
@@ -112,22 +100,13 @@ const getListData = () => {
   if (JSON.stringify(state.queryData) !== JSON.stringify(state.submitData)) {
     state.currentPage = 1
   }
-  // if(state.currentPage==1){
-  //   state.current=1
-  // }else{
-  //   state.current=(state.currentPage-1)*10+1
-  // }
-  // const formData = state.queryData
+  const formData = state.queryData
   getLeaderTask({
-    userId:Session.getString("uid")
+    userId:Session.getString("uid"),
+    ...formData
   }).then((data: any) => {
     state.loading = false
     state.list = data.data
-    // if (state.currentPage === 1) {
-    //   state.totalPage = data.pages
-    //   state.totalMembers = data.totalMembers
-    //   state.totalBalance = data.totalBalance
-    // }
     state.submitData = state.queryData
   }).catch(() => {
     state.loading = false
@@ -151,6 +130,7 @@ const handleCurrentChange = () => {
 // 页面加载时
 onMounted(() => {
   getListData()
+  getListTeacher()
 })
 
 </script>

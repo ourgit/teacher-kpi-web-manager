@@ -33,7 +33,7 @@ export default defineConfig({
     // 配置跨域处理
     proxy: {
       '/v1/': {
-        target: 'http://120.48.81.209:9166',
+        target: 'http://120.48.81.209',
         changeOrigin: true,
       }
     },

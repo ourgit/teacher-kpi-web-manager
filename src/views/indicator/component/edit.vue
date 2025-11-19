@@ -67,7 +67,7 @@ const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
 const getKpiList=()=>{
   getKPIList({})
   .then((data: any) => {
-    state.kpiList=data.data.list
+    state.kpiList=data.list
   })
   .catch((e) => {
     console.error(e);

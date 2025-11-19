@@ -36,11 +36,6 @@
         <el-table-column prop="userName" label="用户姓名" show-overflow-tooltip/>
         <el-table-column prop="typeName" label="职业名称" show-overflow-tooltip/>
         <el-table-column prop="role.nickName" label="角色类型" show-overflow-tooltip width="120"/>
-        <!-- <el-table-column label="用户角色" show-overflow-tooltip width="100">
-          <template #default="{ row }">
-            {{ formatUserType(row.userType) }}
-          </template>
-        </el-table-column> -->
         <el-table-column fixed="right" label="状态" show-overflow-tooltip width="100">
           <template #default="{ row }">
             <el-tag type="success" v-if="row.status === 1">正常</el-tag>
@@ -49,18 +44,7 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template #default="{ row }">
-            <el-form>
-              <el-dropdown style="margin-left:10px">
-                <el-button size="small" text type="primary">
-                  更多
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="OnOpenWithDraw(row)">撤销</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </el-form>
+            <el-button size="small" text type="primary" @click="OnOpenWithDraw(row)">撤销</el-button>
           </template>
         </el-table-column>
       </el-table>

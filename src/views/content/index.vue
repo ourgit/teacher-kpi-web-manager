@@ -43,24 +43,8 @@
         </el-table-column> -->
         <el-table-column fixed="right" label="操作" style="text-align: center;">
           <template #default="{ row }">
-            <el-form>
-              <!-- <router-link :to="`/member/detail?uid=${row.id}`" class="mr10">
-                <el-button size="small" text type="primary">详情</el-button>
-              </router-link> -->
-              <el-dropdown style="margin-left:10px">
-                <el-button size="small" text type="primary">
-                  更多
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="onOpenEdit(row)">修改</el-dropdown-item>
-                  </el-dropdown-menu>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="onDelete(row)">删除</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </el-form>
+            <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
+            <el-button size="small" text type="primary" @click="onDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -157,7 +141,7 @@ const getListData = () => {
 const getElement=()=>{
   getElementList({})
   .then((data: any) => {
-    state.indicatorList=data.data.list
+    state.indicatorList=data.list
   })
   .catch((e) => {
     console.error(e);
