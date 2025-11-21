@@ -14,12 +14,18 @@
         <el-form-item label="职业名称">
           <el-input v-model="queryData.typeName" size="default" placeholder="请输入职业名称" clearable/>
         </el-form-item>
-        <el-form-item label="角色类型">
-          <el-select v-model="queryData.roleId" size="default" placeholder="会员等级" clearable>
-            <el-option label="全部" :value="0" />
-            <el-option v-for="item in state.roleList" :key="item.id" :label="item.nickName" :value="item.id" />
-          </el-select>
-        </el-form-item>
+          <el-form-item label="角色类型">
+            <el-select v-model="queryData.roleId" size="default" placeholder="会员等级" clearable>
+              <el-option label="全部" :value="0" />
+              <el-option v-for="item in state.roleList" :key="item.id" :label="item.nickName" :value="item.id" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="所属部门">
+            <el-select v-model="queryData.departmentId" size="default" placeholder="所属部门" clearable>
+              <el-option label="全部" :value="0" />
+              <el-option v-for="item in state.departmentList" :key="item.id" :label="item.departmentName" :value="item.id" />
+            </el-select>
+          </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="queryData.status" size="default" placeholder="会员等级" clearable>
             <el-option label="全部" :value="0" />
@@ -47,6 +53,7 @@
         <el-table-column prop="phone" label="手机号码" show-overflow-tooltip width="130"/>
         <el-table-column prop="userName" label="用户姓名" show-overflow-tooltip/>
         <el-table-column prop="typeName" label="职业名称" show-overflow-tooltip/>
+        <el-table-column prop="department.departmentName" label="所属部门" show-overflow-tooltip/>
         <el-table-column prop="role.nickName" label="角色类型" show-overflow-tooltip width="120"/>
         <!-- <el-table-column label="用户角色" show-overflow-tooltip width="100">
           <template #default="{ row }">
@@ -77,7 +84,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
-import { getRoleList,getMemberList } from '@/api/member/index'
+import { getDepartmentList,getRoleList,getMemberList } from '@/api/member/index'
 import { storeToRefs } from 'pinia'
 import { useUserInfo } from '@/stores/userInfo'
 const stores = useUserInfo()
@@ -111,6 +118,7 @@ const state = reactive({
   } as any,
   submitData: {},
   roleList: [] as any,
+  departmentList: [] as any,
   totalMembers: 0,
   totalBalance: 0
 })
@@ -125,6 +133,16 @@ const getRoleLists=()=>{
     console.error(e);
   })
 }
+
+const getDepartmentLists=()=>{
+  getDepartmentList({})
+  .then((data: any) => {
+    state.departmentList = data.list
+  }).catch((e) => {
+    console.error(e);
+  })
+}
+
 
 // 获取列表
 const getListData = () => {
@@ -171,6 +189,7 @@ const handleCurrentChange = () => {
 onMounted(() => {
   getListData()
   getRoleLists()
+  getDepartmentLists()
 })
 </script>
 

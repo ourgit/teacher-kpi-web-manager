@@ -255,9 +255,70 @@ export const localRoutes: Array<RouteRecordRaw> = [
               roles: ['admin'],
               icon: 'ele-User',
             },
+          },{
+            path: '/member/department',
+            name: 'memberDepartment',
+            component: () => import('@/views/member/department/index.vue'),
+            meta: {
+              title: '部门管理',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['admin'],
+              icon: 'ele-User',
+            },
+          },{
+            path: '/member/campus',
+            name: 'memberCampus',
+            component: () => import('@/views/member/campus/index.vue'),
+            meta: {
+              title: '校区管理',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['admin'],
+              icon: 'ele-User',
+            },
           }
         ],
       },
+      {
+        path: '/tool',
+        name: 'tool',
+        component: () => import('@/layout/routerView/tool.vue'),
+        redirect: '/tool/json',
+        meta: {
+          title: '工具',
+          isLink: '',
+          isHide: false,
+          isKeepAlive: true,
+          isAffix: false,
+          isIframe: false,
+          roles: ['admin'],
+          icon: 'ele-Setting',
+        },
+        children: [
+          {
+            path: '/tool/json',
+            name: 'JsonIndex',
+            component: () => import('@/views/tool/json/index.vue'),
+            meta: {
+              title: '动态生成json',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['admin'],
+              icon: 'ele-Setting',
+            },
+          }
+        ],
+      }
       //待删除
       // {
       //   path: '/system',

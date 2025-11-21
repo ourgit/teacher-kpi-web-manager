@@ -220,3 +220,98 @@ export function getTeacherTaskFile(data: any){
     data: data
   })
 }
+
+export function getDepartmentList(data: any){
+  return request({
+    url: '/v1/tk/department/list/',
+    method: 'get',
+    data: data
+  })
+}
+
+/**
+ * 部门搜索列表
+ */
+export function searchDepartmentList(params?: object) {
+  return request({
+    url: '/v1/tk/department/searchlist',
+    method: 'get',
+    params,
+  })
+}
+
+/**
+ * 新增部门
+ */
+export function addDepartment(data: object) {
+  return request({
+    url: '/v1/tk/department/add/',
+    method: 'post',
+    data,
+  })
+}
+
+/**
+ * 更新部门
+ */
+export function updateDepartment(data: object) {
+  return request({
+    url: '/v1/tk/department/update',
+    method: 'post',
+    data,
+  })
+}
+
+/**
+ * 删除部门
+ */
+export function deleteDepartment(data: object) {
+  return request({
+    url: '/v1/tk/department/delete',
+    method: 'post',
+    data,
+  })
+}
+
+/**
+ * 校区全部列表
+ */
+export function getCampusList() {
+  return request({
+    url: '/v1/tk/campus/list/',
+    method: 'get'
+  })
+}
+
+/**
+ * 新增校区
+ */
+export function addCampus(data: object) {
+  return request({
+    url: '/v1/tk/campus/add/',
+    method: 'post',
+    data,
+  })
+}
+
+/**
+ * 更新校区
+ */
+export function updateCampus(data: object) {
+  return request({
+    url: '/v1/tk/campus/update/',
+    method: 'post',
+    data,
+  })
+}
+
+/**
+ * 删除校区
+ */
+export function deleteCampus(data: object) {
+  return request({
+    url: '/v1/tk/campus/delete/',
+    method: 'post',
+    data,
+  })
+}
