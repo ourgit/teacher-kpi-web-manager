@@ -32,6 +32,17 @@ export function addTeacher(data:any){
   })
 }
 
+/**
+ * 判断正式导出
+ */
+export function checkExportFormat(data:any){
+  return request({
+    url: '/v1/tk/export/is/format/',
+    method: 'post',
+    data:data
+  })
+}
+
 export function exportPDF(params:any, config:any){
   return request({
     url: '/v1/tk/export/',

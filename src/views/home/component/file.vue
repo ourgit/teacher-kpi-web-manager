@@ -51,9 +51,9 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { ElForm, ElMessage,ElLoading  } from 'element-plus'
+import { ElForm, ElMessage, ElMessageBox, ElLoading  } from 'element-plus'
 import { downloadPdfFromStream } from '@/utils/fileDownload'
-import { exportPDF } from '@/api/home/index'
+import { exportPDF, checkExportFormat } from '@/api/home/index'
 import { getKPIListGet } from '@/api/kpi/index'
 import { fa } from 'element-plus/es/locale'
 
@@ -105,41 +105,83 @@ const onCancel = () => {
 
 // 提交
 const handleDownloadPdf = async () => {
-  const loadingInstance = ElLoading.service({
-    lock: true,
-    text: '文件下载中...',
-    background: 'rgba(0, 0, 0, 0.7)'
-  })
-  
-  loading.value = true
-  
+
+  console.log(state.ruleForm)
+
+  // 验证是否选择了KPI
+  if (!state.ruleForm.kpiId) {
+    ElMessage.warning('请先选择KPI名称')
+    return
+  }
+
   try {
-    // 调用API获取PDF流
-    const data = await exportPDF(state.ruleForm, {
-      responseType: 'blob' // 重要：设置响应类型为blob
+    // 先判断是正式导出还是预导出
+    const checkResult = await checkExportFormat({
+      userId: state.ruleForm.userId,
+      kpiId: state.ruleForm.kpiId
+    })
+
+    const exportType = checkResult.format ? '正式导出' : '预导出'
+    const exportMsg = checkResult.msg || exportType
+
+    // 显示确认弹窗
+    await ElMessageBox.confirm(
+      `当前为${exportMsg}，是否确认导出？`,
+      '导出确认',
+      {
+        confirmButtonText: '确认导出',
+        cancelButtonText: '取消',
+        type: 'info'
+      }
+    )
+
+    // 用户确认后，开始导出
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: '文件下载中...',
+      background: 'rgba(0, 0, 0, 0.7)'
     })
     
-    // 从响应头获取文件名
-    const filename = "教师绩效.pdf"
-    if(data.code==40001){
-        ElMessage.error(data.reason);
-        loading.value = false;
-        loadingInstance.close()
-        return;
-    }
-
-    // 下载文件
-    const success =await downloadPdfFromStream(data, filename)
+    loading.value = true
     
-    if (success) {
-      ElMessage.success('文件下载成功')
+    try {
+      // 调用API获取PDF流
+      const data = await exportPDF({
+        userId: state.ruleForm.userId,
+        kpiId: state.ruleForm.kpiId,
+        format: checkResult.format
+      }, {
+        responseType: 'blob' // 重要：设置响应类型为blob
+      })
+      
+      // 从响应头获取文件名
+      const filename = "教师绩效.pdf"
+      if(data.code==40001){
+          ElMessage.error(data.reason);
+          loading.value = false;
+          loadingInstance.close()
+          return;
+      }
+
+      // 下载文件
+      const success = await downloadPdfFromStream(data, filename)
+      
+      if (success) {
+        ElMessage.success('文件下载成功')
+      }
+    } catch (error:any) {
+      console.error('下载失败:', error)
+      ElMessage.error('文件下载失败: ' + (error.message || '未知错误'))
+    } finally {
+      loading.value = false
+      loadingInstance.close()
     }
   } catch (error:any) {
-    console.error('下载失败:', error)
-    ElMessage.error('文件下载失败: ' + (error.message || '未知错误'))
-  } finally {
-    loading.value = false
-    loadingInstance.close()
+    // 用户取消或判断接口失败
+    if (error !== 'cancel') {
+      console.error('判断导出类型失败:', error)
+      ElMessage.error('判断导出类型失败: ' + (error.message || '未知错误'))
+    }
   }
 }
 // 暴露变量

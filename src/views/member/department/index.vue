@@ -163,6 +163,7 @@ function getListData() {
     campusId: state.queryForm.campusId || undefined,
   })
     .then((res: any) => {
+      console.log(res)
       state.list = res.list || res.data || []
     })
     .finally(() => {

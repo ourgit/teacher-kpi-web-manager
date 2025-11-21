@@ -1,79 +1,71 @@
 <template>
-  <div class="page-container layout-padding">
-    <el-row :gutter="20">
-      <!-- 左侧元素列表 -->
-      <el-col :span="8">
+  <div class="page-container scrollable-page">
+    <div class="page-content-wrapper">
+      <!-- 选项配置区域 -->
         <el-card shadow="hover" class="layout-padding-auto">
           <template #header>
             <div class="card-header">
-              <span>元素</span>
-            </div>
-          </template>
-          <div class="element-tip">
-            拖拽左侧的表单元素到右侧区域,即可生成相应的HTML代码,表单代码,轻松搞定!
+            <span>选项配置</span>
+            <el-button type="primary" @click="handleAddOption">添加选项</el-button>
           </div>
-          <div class="element-list">
-            <div
-              v-for="element in elementList"
-              :key="element.type"
-              class="element-item"
-              draggable="true"
-              @dragstart="handleDragStart($event, element)"
-            >
-              <div class="element-label">{{ element.label }}:</div>
-              <div class="element-preview" v-html="getElementPreview(element)"></div>
-            </div>
+        </template>
+        <div class="options-list">
+          <div v-if="options.length === 0" class="empty-tip">
+            暂无选项，请点击"添加选项"按钮添加
           </div>
-          <div class="element-actions">
-            <el-button type="success" @click="handleSubmit">提交</el-button>
-            <el-button @click="handleClear">清空</el-button>
-          </div>
-        </el-card>
-      </el-col>
-
-      <!-- 右侧拖拽区域 -->
-      <el-col :span="16">
-        <el-card shadow="hover" class="layout-padding-auto">
-          <template #header>
-            <div class="card-header">
-              <span>拖拽左侧表单元素到此区域</span>
-              <el-select v-model="columnCount" size="small" style="width: 150px">
-                <el-option label="显示1列" :value="1" />
-                <el-option label="显示2列" :value="2" />
-                <el-option label="显示3列" :value="3" />
-              </el-select>
-            </div>
-          </template>
           <div
-            class="drop-area"
-            @drop="handleDrop"
-            @dragover.prevent
-            @dragenter.prevent
+            v-for="(option, index) in options"
+            :key="option.id"
+            class="option-item"
           >
-            <div v-if="droppedElements.length === 0" class="empty-tip">
-              请拖拽左侧元素到此处
+            <div class="option-content">
+              <div class="option-index">{{ index + 1 }}</div>
+              <div class="option-form">
+                <el-input
+                  v-model="option.name"
+                  placeholder="请输入选项名称"
+                  @blur="handleOptionChange"
+                />
+                <el-input-number
+                  v-model="option.score"
+                  :min="0"
+                  :max="100"
+                  placeholder="请输入分数"
+                  @change="handleOptionChange"
+                />
             </div>
-            <div
-              v-for="(element, index) in droppedElements"
-              :key="index"
-              class="dropped-element"
-              :style="{ width: `${100 / columnCount}%` }"
-            >
-              <div class="element-label">{{ element.label }}:</div>
-              <div class="element-preview" v-html="getElementPreview(element)"></div>
-              <div class="element-actions">
-                <a href="javascript:void(0)" @click="handleEdit(index)">编辑HTML</a>
-                <span> | </span>
-                <a href="javascript:void(0)" @click="handleRemove(index)">移除</a>
+              <div class="option-actions">
+                <el-button
+                  size="small"
+                  type="danger"
+                  :icon="Delete"
+                  circle
+                  @click="handleRemoveOption(index)"
+                />
+                <el-button
+                  v-if="index > 0"
+                  size="small"
+                  :icon="ArrowUp"
+                  circle
+                  @click="handleMoveOption(index, 'up')"
+                />
+                <el-button
+                  v-if="index < options.length - 1"
+                  size="small"
+                  :icon="ArrowDown"
+                  circle
+                  @click="handleMoveOption(index, 'down')"
+                />
               </div>
             </div>
           </div>
-          <div class="code-actions">
-            <el-button type="warning" @click="handleCopyCode">复制代码</el-button>
+        </div>
+        <div class="config-actions">
+          <el-button type="success" @click="handleSubmit">保存配置</el-button>
+          <el-button @click="handleClear">清空</el-button>
+          <!-- <el-button type="warning" @click="handleCopyCode">复制JSON</el-button> -->
           </div>
         </el-card>
-      </el-col>
-    </el-row>
 
     <!-- JSON列表 -->
     <el-card shadow="hover" class="layout-padding-auto" style="margin-top: 20px">
@@ -90,7 +82,7 @@
             <pre>{{ formatJsonParam(row.jsonParam) }}</pre>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="100">
+          <el-table-column fixed="right" label="操作" width="150">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="handleLoadJson(row)">加载</el-button>
             <el-button size="small" text type="danger" @click="handleDeleteJson(row)">删除</el-button>
@@ -99,32 +91,23 @@
       </el-table>
     </el-card>
 
-    <!-- 编辑HTML对话框 -->
-    <el-dialog v-model="editDialogVisible" title="编辑HTML" width="800px">
-      <el-input
-        v-model="editingHtml"
-        type="textarea"
-        :rows="15"
-        placeholder="请输入HTML代码"
-      />
-      <template #footer>
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleUpdateHtml">更新HTML</el-button>
-      </template>
-    </el-dialog>
-
     <!-- 添加JSON对话框 -->
-    <el-dialog v-model="addDialogVisible" title="添加JSON" width="600px" @opened="handleDialogOpened">
+      <el-dialog v-model="addDialogVisible" title="保存配置" width="600px" @opened="handleDialogOpened">
       <el-form :model="addForm" label-width="100px">
         <el-form-item label="描述">
-          <el-input v-model="addForm.description" placeholder="请输入描述" />
+            <el-select v-model="addForm.description" placeholder="请选择类型" style="width: 100%">
+              <el-option label="计分" value="count" />
+              <el-option label="选择" value="select" />
+              <el-option label="排它" value="exclusive" />
+            </el-select>
         </el-form-item>
         <el-form-item label="JSON参数">
           <el-input
             v-model="addForm.jsonText"
             type="textarea"
             :rows="10"
-            placeholder="请输入JSON字符串"
+              placeholder="JSON参数"
+              readonly
           />
         </el-form-item>
       </el-form>
@@ -133,394 +116,149 @@
         <el-button type="primary" @click="handleAddJson">确定</el-button>
       </template>
     </el-dialog>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, h, resolveComponent } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Delete, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 import { addJson, getJsonList, deleteJson } from '@/api/tool/index'
 
-interface ElementItem {
-  type: string
-  label: string
-  component: any
-  props: any
-  html?: string
+interface OptionItem {
+  id: number
+  name: string
+  score: number
 }
 
-const columnCount = ref(1)
+// 类型映射：英文值 -> 中文名称
+const typeMap: Record<string, string> = {
+  count: '计分',
+  select: '选择',
+  exclusive: '排它'
+}
+
+// 类型反向映射：中文名称 -> 英文值
+const typeReverseMap: Record<string, string> = {
+  '计分': 'count',
+  '选择': 'select',
+  '排它': 'exclusive'
+}
+
 const loading = ref(false)
 const jsonList = ref<any[]>([])
-const droppedElements = ref<ElementItem[]>([])
-const editDialogVisible = ref(false)
+const options = ref<OptionItem[]>([])
 const addDialogVisible = ref(false)
-const editingIndex = ref(-1)
-const editingHtml = ref('')
 const addForm = reactive({
-  description: '',
+  description: 'select',
   jsonText: ''
 })
 
-// 渲染元素组件
-const renderElement = (element: ElementItem) => {
-  const component = element.component
-  const props = element.props
-  
-  if (component === 'span') {
-    return h('span', props.innerHTML || '这里是纯文字信息')
+// 添加选项
+const handleAddOption = () => {
+  const newOption: OptionItem = {
+    id: Date.now() + Math.random(),
+    name: '',
+    score: 0
   }
-  
-  if (component === 'el-radio-group') {
-    return h(resolveComponent('el-radio-group') as any, props, {
-      default: () => [
-        h(resolveComponent('el-radio') as any, { label: 'option1' }, '选项1'),
-        h(resolveComponent('el-radio') as any, { label: 'option2' }, '选项2')
-      ]
-    })
-  }
-  
-  if (component === 'el-checkbox-group') {
-    return h(resolveComponent('el-checkbox-group') as any, props, {
-      default: () => [
-        h(resolveComponent('el-checkbox') as any, { label: 'option1' }, '选项1'),
-        h(resolveComponent('el-checkbox') as any, { label: 'option2' }, '选项2'),
-        h(resolveComponent('el-checkbox') as any, { label: 'option3' }, '选项3')
-      ]
-    })
-  }
-  
-  if (component === 'el-select') {
-    return h(resolveComponent('el-select') as any, props, {
-      default: () => [
-        h(resolveComponent('el-option') as any, { label: '选项1', value: 'option1' }),
-        h(resolveComponent('el-option') as any, { label: '选项2', value: 'option2' })
-      ]
-    })
-  }
-  
-  return h(resolveComponent(component) as any, props)
+  options.value.push(newOption)
 }
 
-// 元素列表
-const elementList = ref<ElementItem[]>([
-  {
-    type: 'text',
-    label: '文本框',
-    component: 'el-input',
-    props: { placeholder: '请输入文本', modelValue: '' }
-  },
-  {
-    type: 'textarea',
-    label: '多行文本框',
-    component: 'el-input',
-    props: { type: 'textarea', placeholder: '请输入文本', modelValue: '' }
-  },
-  {
-    type: 'password',
-    label: '密码框',
-    component: 'el-input',
-    props: { type: 'password', placeholder: '请输入密码', modelValue: '', showPassword: false }
-  },
-  {
-    type: 'select',
-    label: '下拉框',
-    component: 'el-select',
-    props: { placeholder: '请选择', modelValue: '' }
-  },
-  {
-    type: 'text-display',
-    label: '纯文本',
-    component: 'span',
-    props: { innerHTML: '这里是纯文字信息' }
-  },
-  {
-    type: 'radio',
-    label: '单选框',
-    component: 'el-radio-group',
-    props: { modelValue: 'option1' }
-  },
-  {
-    type: 'checkbox',
-    label: '复选框',
-    component: 'el-checkbox-group',
-    props: { modelValue: [] }
-  },
-  {
-    type: 'switch',
-    label: '切换按钮',
-    component: 'el-switch',
-    props: { modelValue: true }
-  },
-  {
-    type: 'date',
-    label: '日期选择',
-    component: 'el-date-picker',
-    props: { type: 'date', placeholder: '选择日期', modelValue: '' }
-  }
-])
-
-// 获取元素预览HTML
-const getElementPreview = (element: ElementItem): string => {
-  // 如果元素有自定义HTML，优先使用
-  if (element.html) {
-    return element.html
-  }
-  
-  // 否则使用默认预览
-  if (element.type === 'text-display') {
-    return element.props.innerHTML || '这里是纯文字信息'
-  }
-  if (element.type === 'text') {
-    return `<input type="text" class="el-input__inner" placeholder="${element.props.placeholder || ''}" readonly>`
-  }
-  if (element.type === 'textarea') {
-    return `<textarea class="el-textarea__inner" placeholder="${element.props.placeholder || ''}" readonly></textarea>`
-  }
-  if (element.type === 'password') {
-    return `<input type="password" class="el-input__inner" placeholder="${element.props.placeholder || ''}" readonly>`
-  }
-  if (element.type === 'select') {
-    return `<select class="el-select__inner" readonly><option>选项1</option><option>选项2</option></select>`
-  }
-  if (element.type === 'radio') {
-    return `<div><label><input type="radio" name="radio" checked> 选项1</label> <label><input type="radio" name="radio"> 选项2</label></div>`
-  }
-  if (element.type === 'checkbox') {
-    return `<div><label><input type="checkbox"> 选项1</label> <label><input type="checkbox"> 选项2</label> <label><input type="checkbox"> 选项3</label></div>`
-  }
-  if (element.type === 'switch') {
-    return `<span class="el-switch is-checked"><span class="el-switch__core"></span></span>`
-  }
-  if (element.type === 'date') {
-    return `<input type="text" class="el-input__inner" placeholder="${element.props.placeholder || ''}" value="2018-04-20" readonly>`
-  }
-  return ''
+// 移除选项
+const handleRemoveOption = (index: number) => {
+  options.value.splice(index, 1)
 }
 
-// 拖拽开始
-const handleDragStart = (event: DragEvent, element: ElementItem) => {
-  if (event.dataTransfer) {
-    event.dataTransfer.setData('application/json', JSON.stringify(element))
+// 移动选项
+const handleMoveOption = (index: number, direction: 'up' | 'down') => {
+  const targetIndex = direction === 'up' ? index - 1 : index + 1
+  if (targetIndex >= 0 && targetIndex < options.value.length) {
+    const temp = options.value[index]
+    options.value[index] = options.value[targetIndex]
+    options.value[targetIndex] = temp
   }
 }
 
-// 拖拽放置
-const handleDrop = (event: DragEvent) => {
-  event.preventDefault()
-  const data = event.dataTransfer?.getData('application/json')
-  if (data) {
-    const element = JSON.parse(data)
-    const newElement = {
-      ...element,
-      id: Date.now() + Math.random()
-    }
-    droppedElements.value.push(newElement)
-    generateJson()
-  }
-}
-
-// 编辑HTML
-const handleEdit = (index: number) => {
-  editingIndex.value = index
-  const element = droppedElements.value[index]
-  editingHtml.value = element.html || generateElementHtml(element)
-  editDialogVisible.value = true
-}
-
-// 更新HTML
-const handleUpdateHtml = () => {
-  if (editingIndex.value >= 0) {
-    droppedElements.value[editingIndex.value].html = editingHtml.value
-    // 强制更新视图
-    droppedElements.value = [...droppedElements.value]
-    generateJson()
-  }
-  editDialogVisible.value = false
-}
-
-// 移除元素
-const handleRemove = (index: number) => {
-  droppedElements.value.splice(index, 1)
-  generateJson()
-}
-
-// 生成元素HTML
-const generateElementHtml = (element: ElementItem): string => {
-  const label = element.label
-  const type = element.type
-  
-  if (type === 'checkbox') {
-    return `<label class="col-sm-3 control-label">${label}: </label>
-<div class="col-sm-9">
-<label class="check-box">
-<input type="checkbox" value="option1" id="inlineCheckbox1">选项1
-</label>
-<label class="check-box">
-<input type="checkbox" value="option2" id="inlineCheckbox2">选项2
-</label>
-<label class="check-box">
-<input type="checkbox" value="option3" id="inlineCheckbox3">选项3
-</label>
-</div>`
-  }
-  
-  if (type === 'radio') {
-    return `<label class="col-sm-3 control-label">${label}: </label>
-<div class="col-sm-9">
-<label class="check-box">
-<input type="radio" name="radio${Date.now()}" value="option1" id="inlineRadio1" checked>选项1
-</label>
-<label class="check-box">
-<input type="radio" name="radio${Date.now()}" value="option2" id="inlineRadio2">选项2
-</label>
-</div>`
-  }
-  
-  if (type === 'select') {
-    return `<label class="col-sm-3 control-label">${label}: </label>
-<div class="col-sm-9">
-<select class="form-control">
-<option value="option1">选项1</option>
-<option value="option2">选项2</option>
-</select>
-</div>`
-  }
-  
-  return `<label class="col-sm-3 control-label">${label}: </label>
-<div class="col-sm-9">
-<input type="text" class="form-control" placeholder="请输入${label}">
-</div>`
+// 选项变化时更新JSON
+const handleOptionChange = () => {
+  // 可以在这里实时更新预览
 }
 
 // 生成JSON
-const generateJson = () => {
-  // 根据拖拽的元素生成JSON格式
-  const hasSelect = droppedElements.value.some(el => el.type === 'select' || el.type === 'checkbox' || el.type === 'radio')
+const generateJson = (type?: string) => {
+  const jsonType = type || addForm.description || 'select'
   
-  if (hasSelect) {
-    // 选择类型 - 查找复选框、单选框或下拉框元素
-    const selectElement = droppedElements.value.find(el => el.type === 'checkbox' || el.type === 'radio' || el.type === 'select')
-    
-    if (selectElement) {
-      // 从HTML中解析选项，或使用默认选项
-      let options: Array<{ name: string; score: number }> = []
-      if (selectElement.html) {
-        // 尝试从HTML中解析选项
-        const parser = new DOMParser()
-        const doc = parser.parseFromString(selectElement.html, 'text/html')
-        
-        // 解析复选框和单选框
-        const checkboxes = doc.querySelectorAll('input[type="checkbox"], input[type="radio"]')
-        if (checkboxes.length > 0) {
-          checkboxes.forEach((cb, index) => {
-            // 获取label中的文本，可能是nextSibling或者parent的textContent
-            let labelText = ''
-            const parent = cb.parentElement
-            if (parent) {
-              // 获取label标签内的文本，去掉input本身
-              const clone = parent.cloneNode(true) as HTMLElement
-              const input = clone.querySelector('input')
-              if (input) {
-                input.remove()
-              }
-              labelText = clone.textContent?.trim() || `选项${index + 1}`
-            } else {
-              labelText = cb.nextSibling?.textContent?.trim() || `选项${index + 1}`
-            }
-            if (labelText) {
-              options.push({ name: labelText, score: 18 - index * 2 })
-            }
-          })
-        }
-        
-        // 解析下拉框
-        const select = doc.querySelector('select')
-        if (select && options.length === 0) {
-          const selectOptions = select.querySelectorAll('option')
-          selectOptions.forEach((opt, index) => {
-            const labelText = opt.textContent?.trim() || opt.value || `选项${index + 1}`
-            options.push({ name: labelText, score: 18 - index * 2 })
-          })
-        }
-        
-        // 如果解析失败，使用默认选项
-        if (options.length === 0) {
-          if (selectElement.type === 'checkbox') {
-            options = [
-              { name: '选项1', score: 18 },
-              { name: '选项2', score: 16 },
-              { name: '选项3', score: 14 }
-            ]
-          } else {
-            options = [
-              { name: '选项1', score: 18 },
-              { name: '选项2', score: 16 }
-            ]
-          }
-        }
-      } else {
-        // 默认选项
-        if (selectElement.type === 'checkbox') {
-          options = [
-            { name: '选项1', score: 18 },
-            { name: '选项2', score: 16 },
-            { name: '选项3', score: 14 }
-          ]
-        } else {
-          options = [
-            { name: '选项1', score: 18 },
-            { name: '选项2', score: 16 }
-          ]
-        }
-      }
-      
-      return {
-        type: 'select',
-        data: options
-      }
+  if (jsonType === 'count') {
+    return {
+      type: 'count',
+      data: []
     }
   }
   
-  // 计分类型
+  if (options.value.length === 0) {
+    return null
+  }
+  
+  // 过滤掉名称为空的选项
+  const validOptions = options.value
+    .filter(opt => opt.name && opt.name.trim())
+    .map(opt => ({
+      name: opt.name.trim(),
+      score: opt.score || 0
+    }))
+  
+  if (validOptions.length === 0) {
+    return null
+  }
+  
   return {
-    type: 'count',
-    data: []
+    type: jsonType,
+    data: validOptions
   }
 }
 
 // 复制代码
-const handleCopyCode = () => {
+/* const handleCopyCode = () => {
   const json = generateJson()
+  if (!json) {
+    ElMessage.warning('请先配置选项')
+    return
+  }
   const jsonStr = JSON.stringify(json, null, 2)
   navigator.clipboard.writeText(jsonStr).then(() => {
     ElMessage.success('复制成功')
   }).catch(() => {
     ElMessage.error('复制失败')
   })
-}
-
-// 对话框打开时重新生成JSON
-const handleDialogOpened = () => {
-  if (droppedElements.value.length === 0) {
-    addForm.jsonText = ''
-    return
-  }
-  const json = generateJson()
-  if (json) {
-    addForm.jsonText = JSON.stringify(json, null, 2)
-  } else {
-    addForm.jsonText = ''
-    ElMessage.warning('生成JSON失败，请检查元素配置')
-  }
-}
+} */
 
 // 提交
 const handleSubmit = () => {
-  if (droppedElements.value.length === 0) {
-    ElMessage.warning('请先拖拽元素到右侧区域')
+  // 如果是计分类型，不需要选项
+  if (addForm.description === 'count') {
+    const json = generateJson('count')
+    if (!json) {
+      ElMessage.error('生成JSON失败')
     return
   }
+    addForm.jsonText = JSON.stringify(json, null, 2)
+    addDialogVisible.value = true
+    return
+  }
+  
+  // 选择和排它类型需要选项
+  if (options.value.length === 0) {
+    ElMessage.warning('请先添加选项')
+    return
+  }
+  
+  const validOptions = options.value.filter(opt => opt.name && opt.name.trim())
+  if (validOptions.length === 0) {
+    ElMessage.warning('请至少填写一个选项名称')
+    return
+  }
+  
   const json = generateJson()
   if (!json) {
     ElMessage.error('生成JSON失败')
@@ -530,9 +268,31 @@ const handleSubmit = () => {
   addDialogVisible.value = true
 }
 
+// 对话框打开时生成JSON
+const handleDialogOpened = () => {
+  const json = generateJson()
+  if (json) {
+    addForm.jsonText = JSON.stringify(json, null, 2)
+  } else {
+    addForm.jsonText = ''
+  }
+}
+
+// 监听类型变化，重新生成JSON
+watch(() => addForm.description, () => {
+  if (addDialogVisible.value) {
+    const json = generateJson()
+    if (json) {
+      addForm.jsonText = JSON.stringify(json, null, 2)
+    } else {
+      addForm.jsonText = ''
+    }
+  }
+})
+
 // 清空
 const handleClear = () => {
-  droppedElements.value = []
+  options.value = []
 }
 
 // 格式化JSON参数
@@ -548,27 +308,49 @@ const formatJsonParam = (jsonParam: string) => {
 // 添加JSON
 const handleAddJson = async () => {
   if (!addForm.description) {
-    ElMessage.warning('请输入描述')
+    ElMessage.warning('请选择类型')
     return
   }
   
   // 如果jsonText为空，重新生成
   if (!addForm.jsonText || addForm.jsonText.trim() === '') {
-    if (droppedElements.value.length === 0) {
-      ElMessage.warning('请先拖拽元素到右侧区域')
+    // 如果是count类型，直接生成
+    if (addForm.description === 'count') {
+      const json = generateJson('count')
+      if (!json) {
+        ElMessage.error('生成JSON失败')
+        return
+      }
+      addForm.jsonText = JSON.stringify(json, null, 2)
+    } else {
+      // 选择和排它类型需要选项
+      if (options.value.length === 0) {
+        ElMessage.warning('请先添加选项')
       return
     }
     const json = generateJson()
     if (!json) {
-      ElMessage.error('生成JSON失败，请检查元素配置')
+        ElMessage.error('生成JSON失败，请检查选项配置')
       return
     }
     addForm.jsonText = JSON.stringify(json, null, 2)
+    }
   }
   
   // 验证JSON格式
   try {
-    JSON.parse(addForm.jsonText)
+    const parsed = JSON.parse(addForm.jsonText)
+    const validTypes = ['count', 'select', 'exclusive']
+    if (!validTypes.includes(parsed.type) || !Array.isArray(parsed.data)) {
+      ElMessage.error('JSON格式错误，需要type为count/select/exclusive且data为数组')
+      return
+    }
+    // 确保JSON中的type与选择的type一致
+    if (parsed.type !== addForm.description) {
+      ElMessage.warning('JSON类型与选择的类型不一致，已自动更新')
+      parsed.type = addForm.description
+      addForm.jsonText = JSON.stringify(parsed, null, 2)
+    }
   } catch (error) {
     ElMessage.error('JSON格式错误，请检查')
     return
@@ -576,14 +358,16 @@ const handleAddJson = async () => {
   
   try {
     loading.value = true
+    // 将类型值转换为中文label作为描述传给后端
+    const descriptionText = typeMap[addForm.description] || addForm.description
     const res = await addJson({
       jsonText: addForm.jsonText,
-      description: addForm.description
+      description: descriptionText
     })
     if (res.code === 200) {
       ElMessage.success('添加成功')
       addDialogVisible.value = false
-      addForm.description = ''
+      addForm.description = 'select'
       addForm.jsonText = ''
       getListData()
     }
@@ -613,10 +397,35 @@ const getListData = async () => {
 const handleLoadJson = (row: any) => {
   try {
     const jsonParam = JSON.parse(row.jsonParam)
-    // 根据JSON参数还原元素
-    droppedElements.value = []
-    // 这里可以根据jsonParam还原元素，简化处理
+    const validTypes = ['count', 'select', 'exclusive']
+    
+    if (!validTypes.includes(jsonParam.type)) {
+      ElMessage.warning('JSON格式不正确，需要type为count/select/exclusive的格式')
+      return
+    }
+    
+    // 设置类型：如果row.description是中文，转换为英文值；否则使用JSON中的type
+    const descriptionValue = typeReverseMap[row.description] || jsonParam.type
+    addForm.description = descriptionValue
+    
+    // 如果是count类型，清空选项
+    if (jsonParam.type === 'count') {
+      options.value = []
+      ElMessage.success('加载成功')
+      return
+    }
+    
+    // 如果是select或exclusive类型，加载选项
+    if (Array.isArray(jsonParam.data)) {
+      options.value = jsonParam.data.map((item: any, index: number) => ({
+        id: Date.now() + index + Math.random(),
+        name: item.name || '',
+        score: item.score || 0
+      }))
     ElMessage.success('加载成功')
+    } else {
+      ElMessage.warning('JSON格式不正确，data应为数组')
+    }
   } catch (error) {
     ElMessage.error('加载失败')
   }
@@ -654,30 +463,44 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .page-container {
+  &.scrollable-page {
+    position: relative !important;
+    height: calc(100vh - 60px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .page-content-wrapper {
+    width: 100%;
+  }
+  
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  .element-tip {
-    font-size: 12px;
-    color: #909399;
-    margin-bottom: 15px;
-    line-height: 1.5;
-  }
-
-  .element-list {
+  .options-list {
+    min-height: 200px;
     max-height: 600px;
     overflow-y: auto;
   }
 
-  .element-item {
+  .empty-tip {
+    text-align: center;
+    color: #909399;
+    padding: 50px 0;
+    font-size: 14px;
+  }
+
+  .option-item {
     margin-bottom: 15px;
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #dcdfe6;
     border-radius: 4px;
-    cursor: move;
+    background-color: #fafafa;
     transition: all 0.3s;
 
     &:hover {
@@ -685,69 +508,52 @@ onMounted(() => {
       background-color: #f5f7fa;
     }
 
-    .element-label {
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #303133;
-    }
-  }
-
-  .element-actions {
-    margin-top: 20px;
-    text-align: center;
-  }
-
-  .drop-area {
-    min-height: 400px;
-    padding: 20px;
-    border: 2px dashed #dcdfe6;
-    border-radius: 4px;
+    .option-content {
     display: flex;
-    flex-wrap: wrap;
+      align-items: center;
     gap: 15px;
-    align-content: flex-start;
 
-    .empty-tip {
-      width: 100%;
-      text-align: center;
-      color: #909399;
-      padding: 50px 0;
-    }
-
-    .dropped-element {
-      padding: 15px;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      background-color: #fafafa;
-      position: relative;
-
-      .element-label {
+      .option-index {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #409eff;
+        color: #fff;
+        border-radius: 50%;
         font-weight: bold;
-        margin-bottom: 8px;
-        color: #303133;
+        flex-shrink: 0;
       }
 
-      .element-actions {
-        margin-top: 10px;
-        font-size: 12px;
-        text-align: right;
+      .option-form {
+        flex: 1;
+        display: flex;
+        gap: 15px;
 
-        a {
-          color: #409eff;
-          text-decoration: none;
-          cursor: pointer;
+        :deep(.el-input) {
+          flex: 2;
+        }
 
-          &:hover {
-            text-decoration: underline;
-          }
+        :deep(.el-input-number) {
+          flex: 1;
+          width: 100%;
         }
       }
+
+      .option-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+      }
     }
   }
 
-  .code-actions {
+  .config-actions {
     margin-top: 20px;
     text-align: right;
+    padding-top: 20px;
+    border-top: 1px solid #dcdfe6;
   }
 
   pre {
