@@ -79,7 +79,7 @@
         <el-table-column prop="description" label="描述" show-overflow-tooltip />
         <el-table-column prop="jsonParam" label="JSON参数" min-width="400">
           <template #default="{ row }">
-            <div class="json-display-wrapper" :class="{ 'is-exclusive': getJsonType(row.jsonParam) === 'exclusive' }">
+            <div class="json-display-wrapper">
               <div class="json-display-header">
                 <span class="json-type-badge" :class="getJsonTypeClass(row.jsonParam)">
                   {{ getJsonTypeLabel(row.jsonParam) }}
@@ -128,8 +128,14 @@
         </el-table-column>
           <el-table-column fixed="right" label="操作" width="150">
           <template #default="{ row }">
-            <el-button size="small" text type="primary" @click="handleLoadJson(row)">加载</el-button>
-            <el-button size="small" text type="danger" @click="handleDeleteJson(row)">删除</el-button>
+          <!--   <el-button size="small" text type="primary" @click="handleLoadJson(row)">加载</el-button> -->
+            <el-button
+              v-if="row.id !== 1"
+              size="small"
+              text
+              type="danger"
+              @click="handleDeleteJson(row)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -665,22 +671,6 @@ onMounted(() => {
     &:hover {
       border-color: #409eff;
       box-shadow: 0 2px 12px rgba(64, 158, 255, 0.15);
-    }
-
-    // 排它类型特殊样式
-    &.is-exclusive {
-      border-color: #f56c6c;
-      box-shadow: 0 0 0 1px rgba(245, 108, 108, 0.1);
-
-      &:hover {
-        border-color: #f56c6c;
-        box-shadow: 0 2px 12px rgba(245, 108, 108, 0.2);
-      }
-
-      .json-display-header {
-        background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
-        border-bottom-color: #f56c6c;
-      }
     }
 
     .json-display-header {

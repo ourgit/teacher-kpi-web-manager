@@ -20,7 +20,7 @@
                 type="datetimerange"
                 start-placeholder="开始时间"
                 end-placeholder="结束时间"
-                range-separator="至"
+                range-separator="-"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 format="YYYY-MM-DD HH:mm:ss"
                 style="width: 100%"
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, nextTick } from 'vue'
+import { reactive, ref, nextTick, watch } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { addKpi } from '@/api/kpi/index'
@@ -52,6 +52,8 @@ const emit = defineEmits(['refresh'])
 interface RuleForm {
   title: string
   timeRange: [string, string] | []
+  createTime: string
+  endTime: string
 }
 
 const dialogFormRef = ref<FormInstance>()
@@ -59,7 +61,9 @@ const isShowDialog = ref(false)
 const loading = ref(false)
 const ruleForm = reactive<RuleForm>({
   title: '',
-  timeRange: []
+  timeRange: [],
+  createTime: '',
+  endTime: ''
 })
 const rules = reactive<FormRules>({
   title: [{ required: true, message: '请输入KPI标题', trigger: 'blur' }],
@@ -69,7 +73,23 @@ const rules = reactive<FormRules>({
 const resetForm = () => {
   ruleForm.title = ''
   ruleForm.timeRange = []
+  ruleForm.createTime = ''
+  ruleForm.endTime = ''
 }
+
+watch(
+  () => ruleForm.timeRange,
+  (val) => {
+    if (Array.isArray(val) && val.length === 2) {
+      ruleForm.createTime = val[0]
+      ruleForm.endTime = val[1]
+    } else {
+      ruleForm.createTime = ''
+      ruleForm.endTime = ''
+    }
+  },
+  { deep: true }
+)
 
 const handleDialogClosed = () => {
   resetForm()
@@ -80,8 +100,10 @@ const handleDialogClosed = () => {
 const openDialog = (row?: any) => {
   if (row) {
     ruleForm.title = row.title || ''
+    ruleForm.createTime = row.createTime || ''
+    ruleForm.endTime = row.endTime || ''
     if (row.createTime && row.endTime) {
-      ruleForm.timeRange = [row.createTime, row.endTime] as [string, string]
+      ruleForm.timeRange = [row.createTime, row.endTime]
     } else {
       ruleForm.timeRange = []
     }
@@ -111,16 +133,19 @@ const onSubmit = async () => {
     return
   }
 
-  if (!Array.isArray(ruleForm.timeRange) || ruleForm.timeRange.length !== 2) {
+  if (!ruleForm.createTime || !ruleForm.endTime) {
     ElMessage.warning('请选择完整的时间范围')
     return
   }
 
-  const [createTime, endTime] = ruleForm.timeRange as [string, string]
+  if (ruleForm.createTime > ruleForm.endTime) {
+    ElMessage.warning('结束时间不能早于开始时间')
+    return
+  }
 
   try {
     loading.value = true
-    await addKpi([{ title: ruleForm.title, createTime, endTime }])
+    await addKpi([{ title: ruleForm.title, createTime: ruleForm.createTime, endTime: ruleForm.endTime }])
     ElMessage.success('添加成功')
     closeDialog()
     emit('refresh')
