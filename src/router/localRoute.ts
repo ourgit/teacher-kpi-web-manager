@@ -106,6 +106,20 @@ export const localRoutes: Array<RouteRecordRaw> = [
               roles: ['admin'],
               icon: 'ele-Notebook',
             }
+          },{
+            path: '/kpi/task',
+            name: 'kpiTask',
+            component: () => import('@/views/kpi/task/index.vue'),
+            meta: {
+              title: '评分任务列表',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['admin'],
+              icon: 'ele-User',
+            },
           },
         ],
       },
@@ -140,7 +154,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               roles: ['admin'],
               icon: 'ele-Switch',
             }
-          },
+          }
         ],
       },
        //element
@@ -233,20 +247,6 @@ export const localRoutes: Array<RouteRecordRaw> = [
             component: () => import('@/views/member/index.vue'),
             meta: {
               title: '用户列表',
-              isLink: '',
-              isHide: false,
-              isKeepAlive: true,
-              isAffix: false,
-              isIframe: false,
-              roles: ['admin'],
-              icon: 'ele-User',
-            },
-          },{
-            path: '/member/task',
-            name: 'memberTask',
-            component: () => import('@/views/member/task/index.vue'),
-            meta: {
-              title: '评分任务列表',
               isLink: '',
               isHide: false,
               isKeepAlive: true,

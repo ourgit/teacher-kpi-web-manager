@@ -30,14 +30,23 @@
       <el-table :data="list" v-loading="loading" style="width: 100%">
         <el-table-column prop="id" label="Id" width="120" />
         <el-table-column prop="status" label="状态" show-overflow-tooltip width="130"/>
-        <el-table-column prop="teacherElementScore.score" label="该用户评分分数" show-overflow-tooltip/>
-        <el-table-column prop="teacherElementScore.finalScore" label="最终分数" show-overflow-tooltip/>
+        <el-table-column label="该用户评分分数" show-overflow-tooltip>
+          <template #default="{ row }">
+              {{ isPass(row.teacherElementScore?.score) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="最终分数" show-overflow-tooltip>
+          <template #default="{ row }">
+              {{ isPass(row.teacherElementScore?.finalScore) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="element.element" label="评分要素名称" show-overflow-tooltip/>
         <el-table-column prop="userName" label="上报用户" show-overflow-tooltip/>
         <el-table-column prop="parentName" label="评分用户" show-overflow-tooltip/>
         <el-table-column fixed="right" label="操作" width="100">
           <template #default="{ row }">
-            <el-button size="small" text type="primary" @click="onAudit(row)">审批</el-button>
+            <el-button v-show="row.status == '已完成'" size="small" text type="primary" @click="onSettle(row)">结算</el-button>
+            <el-button v-show="row.status != '已完成'" size="small" text type="primary" @click="onAudit(row)">审核</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -51,7 +60,8 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
-import { getLeaderTask,getTeacherList } from '@/api/member/index'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getLeaderTask,getTeacherList, deleteTeacherTask } from '@/api/member/index'
 import { storeToRefs } from 'pinia'
 import { useUserInfo } from '@/stores/userInfo'
 const stores = useUserInfo()
@@ -88,6 +98,7 @@ const { list, loading, currentPage, totalPage, queryData, totalMembers, totalBal
 const getListTeacher=()=>{
   getTeacherList()
   .then((data: any) =>{
+    console.log(data)
     state.userList=data.list;
   }).catch(() => {
     console.error("获取失败");
@@ -114,9 +125,38 @@ const getListData = () => {
   })
 }
 
+//判断用户评分分数合格还是不合格
+const isPass = (score:number)=>{
+  if(score >= 5000){
+    return '合格'
+  }else if(score <= -5000){
+    return '不合格'
+  }else{
+    return score
+  }
+}
+
 
 const onAudit = (row:any)=>{
   auditDialogRef.value.openDialog(row)
+}
+
+const onSettle = (row:any)=>{
+  ElMessageBox.confirm('是否确认结算？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(()=>{
+    state.loading = true
+    deleteTeacherTask({
+      taskId: row.id
+    }).then(()=>{
+      ElMessage.success('结算成功')
+      getListData()
+    }).catch(()=>{
+      state.loading = false
+    })
+  }).catch(()=>{})
 }
 
 const handleSizeChange = () => {

@@ -221,6 +221,14 @@ export function getTeacherTaskFile(data: any){
   })
 }
 
+export function deleteTeacherTask(data: any){
+  return request({
+    url: '/v1/tk/teacher/task/delete/',
+    method: 'post',
+    data,
+  })
+}
+
 export function getDepartmentList(data: any){
   return request({
     url: '/v1/tk/department/list/',

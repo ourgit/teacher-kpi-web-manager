@@ -12,7 +12,11 @@
           <el-input v-model="queryData.criteria" size="default" placeholder="请输入评价标准" clearable> </el-input>
         </el-form-item>
         <el-form-item label="模式">
-          <el-input v-model="queryData.type" size="default" placeholder="请输入模式类型(暂定)" clearable> </el-input>
+           <el-select v-model="queryData.type" size="default" placeholder="" clearable>
+            <el-option label="全部" :value="null" />
+            <el-option label="手动" :value="0" />
+            <el-option label="机器评分" :value="1" />
+           </el-select>
         </el-form-item>
         <el-form-item label="分数">
           <el-input v-model="queryData.score" size="default" placeholder="请输入分数" clearable> </el-input>
@@ -42,7 +46,11 @@
         <el-table-column prop="id" label="Id" style="text-align: center;"/>
         <el-table-column prop="element" label="评价要素" style="text-align: center;"/>
         <el-table-column prop="criteria" label="评价标准" style="text-align: center;"/>
-        <el-table-column prop="type" label="模式" style="text-align: center;"/>
+        <el-table-column label="模式" style="text-align: center;">
+          <template #default="{ row }">
+            {{ renderMode(row.type) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="score" label="分值" style="text-align: center;"/>
         <!-- <el-table-column label="加入时间" width="180">
           <template #default="{ row }">
@@ -118,6 +126,11 @@ const state = reactive({
   totalBalance: 0
 })
 
+const modeOptions = [
+  { label: '手动', value: 0 },
+  { label: '机器评分', value: 1 }
+]
+
 const { list, loading, currentPage, totalPage, queryData, indicatorList, totalBalance } = toRefs(state)
 
 // 获取列表
@@ -156,6 +169,11 @@ const getIndicator=()=>{
   .catch((e) => {
     console.error(e);
   })
+}
+
+const renderMode = (type: number) => {
+  const target = modeOptions.find((item)=>item.value === Number(type))
+  return target ? target.label : '-'
 }
 
 const onOpenAdd=()=>{

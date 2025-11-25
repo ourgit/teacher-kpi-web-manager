@@ -15,7 +15,9 @@
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="模式" prop="type">
-              <el-input v-model="ruleForm.data[0].type" placeholder="请输入模式类型(暂定)" clearable></el-input>
+              <el-select v-model="ruleForm.data[0].type" placeholder="选择模式" clearable>
+                <el-option v-for="item in modeOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
@@ -63,6 +65,11 @@ function validateKpiId(rule: any, value: any, callback: any) {
 
 // 定义变量内容
 const dialogFormRef = ref(ElForm)
+const modeOptions = [
+  { label: '手动', value: 0 },
+  { label: '机器评分', value: 1 }
+]
+
 const state = reactive({
   loading: false,
   ruleForm: {} as any,
@@ -95,7 +102,7 @@ const openDialog = (row: any) => {
       id: row.id,
       element: row.element,
       criteria: row.criteria,
-      type: row.type,
+      type: Number(row.type),
       score: row.score,
       indicatorId: row.indicatorId
     }]
