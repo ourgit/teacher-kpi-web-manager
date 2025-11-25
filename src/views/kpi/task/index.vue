@@ -42,11 +42,26 @@
         </el-table-column>
         <el-table-column prop="element.element" label="评分要素名称" show-overflow-tooltip/>
         <el-table-column prop="userName" label="上报用户" show-overflow-tooltip/>
-        <el-table-column prop="parentName" label="评分用户" show-overflow-tooltip/>
+        <el-table-column prop="parentName" label="评分用户" show-overflow-tooltip>
+          <template #default="{ row }">
+            <div class="parent-tags" v-if="formatParentNames(row.parentName).length">
+              <el-tag
+                v-for="(name, idx) in formatParentNames(row.parentName)"
+                :key="idx"
+                type="info"
+                effect="light"
+                class="parent-tag"
+              >
+                {{ name }}
+              </el-tag>
+            </div>
+            <span v-else>—</span>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template #default="{ row }">
-            <el-button v-show="row.status == '已完成'" size="small" text type="primary" @click="onSettle(row)">结算</el-button>
-            <el-button v-show="row.status != '已完成'" size="small" text type="primary" @click="onAudit(row)">审核</el-button>
+            <el-button size="small" text type="primary" @click="onAudit(row)">审核</el-button>
+            <el-button v-if="row.status === '已完成'" size="small" text type="success" @click="onSettle(row)">结算</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -136,6 +151,14 @@ const isPass = (score:number)=>{
   }
 }
 
+const formatParentNames = (names: string | undefined) => {
+  if (!names) return []
+  return names
+    .split(/[,，、\s]/)
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
 
 const onAudit = (row:any)=>{
   auditDialogRef.value.openDialog(row)
@@ -218,5 +241,17 @@ onMounted(() => {
       overflow: hidden;
     }
   }
+}
+
+.parent-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.parent-tag {
+  background-color: #edf5ff;
+  color: #1f71ff;
+  border-color: transparent;
 }
 </style>

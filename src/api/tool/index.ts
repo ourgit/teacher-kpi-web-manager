@@ -33,3 +33,14 @@ export function deleteJson(data: object) {
   })
 }
 
+/**
+ * 更新JSON
+ */
+export function updateJson(data: object) {
+  return request({
+    url: '/v1/tk/type/json/update/',
+    method: 'post',
+    data,
+  })
+}
+

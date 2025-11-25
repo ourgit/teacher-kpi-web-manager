@@ -6,7 +6,14 @@
           <template #header>
             <div class="card-header">
             <span>选项配置</span>
-            <el-button type="primary" @click="handleAddOption">添加选项</el-button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <el-select v-model="currentType" placeholder="请选择类型" style="width: 150px">
+                <el-option label="计分" value="count" />
+                <el-option label="选择" value="select" />
+                <el-option label="排它" value="exclusive" />
+              </el-select>
+              <el-button type="primary" @click="handleAddOption">添加选项</el-button>
+            </div>
           </div>
         </template>
         <div class="options-list">
@@ -61,8 +68,9 @@
           </div>
         </div>
         <div class="config-actions">
-          <el-button type="success" @click="handleSubmit">保存配置</el-button>
+          <el-button type="success" @click="handleSubmit">{{ isEditMode ? '更新配置' : '保存配置' }}</el-button>
           <el-button @click="handleClear">清空</el-button>
+          <el-button v-if="isEditMode" @click="handleCancelEdit">取消编辑</el-button>
           <!-- <el-button type="warning" @click="handleCopyCode">复制JSON</el-button> -->
           </div>
         </el-card>
@@ -126,9 +134,16 @@
             </div>
           </template>
         </el-table-column>
-          <el-table-column fixed="right" label="操作" width="150">
+          <el-table-column fixed="right" label="操作" width="200">
           <template #default="{ row }">
           <!--   <el-button size="small" text type="primary" @click="handleLoadJson(row)">加载</el-button> -->
+            <el-button
+              v-if="row.id !== 1"
+              size="small"
+              text
+              type="primary"
+              @click="handleEditJson(row)"
+            >编辑</el-button>
             <el-button
               v-if="row.id !== 1"
               size="small"
@@ -141,11 +156,11 @@
       </el-table>
     </el-card>
 
-    <!-- 添加JSON对话框 -->
-      <el-dialog v-model="addDialogVisible" title="保存配置" width="600px" @opened="handleDialogOpened">
-      <el-form :model="addForm" label-width="100px">
+    <!-- 保存配置对话框 -->
+      <el-dialog v-model="saveDialogVisible" :title="isEditMode ? '更新配置' : '保存配置'" width="600px" @opened="handleDialogOpened">
+      <el-form :model="saveForm" label-width="100px">
         <el-form-item label="描述">
-            <el-select v-model="addForm.description" placeholder="请选择类型" style="width: 100%">
+            <el-select v-model="saveForm.description" placeholder="请选择类型" style="width: 100%">
               <el-option label="计分" value="count" />
               <el-option label="选择" value="select" />
               <el-option label="排它" value="exclusive" />
@@ -153,7 +168,7 @@
         </el-form-item>
         <el-form-item label="JSON参数">
           <el-input
-            v-model="addForm.jsonText"
+            v-model="saveForm.jsonText"
             type="textarea"
             :rows="10"
               placeholder="JSON参数"
@@ -162,8 +177,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="addDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleAddJson">确定</el-button>
+        <el-button @click="saveDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSaveJson">{{ isEditMode ? '更新' : '确定' }}</el-button>
       </template>
     </el-dialog>
     </div>
@@ -175,7 +190,7 @@ import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, ArrowUp, ArrowDown, DocumentCopy, Document } from '@element-plus/icons-vue'
 import useClipboard from 'vue-clipboard3'
-import { addJson, getJsonList, deleteJson } from '@/api/tool/index'
+import { addJson, getJsonList, deleteJson, updateJson } from '@/api/tool/index'
 
 interface OptionItem {
   id: number
@@ -201,8 +216,12 @@ const typeReverseMap: Record<string, string> = {
 const loading = ref(false)
 const jsonList = ref<any[]>([])
 const options = ref<OptionItem[]>([])
-const addDialogVisible = ref(false)
-const addForm = reactive({
+const currentType = ref('select')
+const isEditMode = ref(false)
+const editingId = ref(0)
+const saveDialogVisible = ref(false)
+const saveForm = reactive({
+  id: 0,
   description: 'select',
   jsonText: ''
 })
@@ -239,7 +258,7 @@ const handleOptionChange = () => {
 
 // 生成JSON
 const generateJson = (type?: string) => {
-  const jsonType = type || addForm.description || 'select'
+  const jsonType = type || currentType.value || 'select'
   
   if (jsonType === 'count') {
     return {
@@ -288,14 +307,16 @@ const generateJson = (type?: string) => {
 // 提交
 const handleSubmit = () => {
   // 如果是计分类型，不需要选项
-  if (addForm.description === 'count') {
+  if (currentType.value === 'count') {
     const json = generateJson('count')
     if (!json) {
       ElMessage.error('生成JSON失败')
-    return
-  }
-    addForm.jsonText = JSON.stringify(json, null, 2)
-    addDialogVisible.value = true
+      return
+    }
+    saveForm.description = currentType.value
+    saveForm.jsonText = JSON.stringify(json, null, 2)
+    saveForm.id = isEditMode.value ? editingId.value : 0
+    saveDialogVisible.value = true
     return
   }
   
@@ -316,28 +337,43 @@ const handleSubmit = () => {
     ElMessage.error('生成JSON失败')
     return
   }
-  addForm.jsonText = JSON.stringify(json, null, 2)
-  addDialogVisible.value = true
+  saveForm.description = currentType.value
+  saveForm.jsonText = JSON.stringify(json, null, 2)
+  saveForm.id = isEditMode.value ? editingId.value : 0
+  saveDialogVisible.value = true
 }
 
 // 对话框打开时生成JSON
 const handleDialogOpened = () => {
   const json = generateJson()
   if (json) {
-    addForm.jsonText = JSON.stringify(json, null, 2)
+    saveForm.jsonText = JSON.stringify(json, null, 2)
   } else {
-    addForm.jsonText = ''
+    saveForm.jsonText = ''
   }
 }
 
 // 监听类型变化，重新生成JSON
-watch(() => addForm.description, () => {
-  if (addDialogVisible.value) {
-    const json = generateJson()
+watch(() => saveForm.description, () => {
+  if (saveDialogVisible.value) {
+    const json = generateJson(saveForm.description)
     if (json) {
-      addForm.jsonText = JSON.stringify(json, null, 2)
+      saveForm.jsonText = JSON.stringify(json, null, 2)
     } else {
-      addForm.jsonText = ''
+      saveForm.jsonText = ''
+    }
+  }
+})
+
+// 监听当前类型变化，同步到保存表单
+watch(() => currentType.value, () => {
+  if (saveDialogVisible.value) {
+    saveForm.description = currentType.value
+    const json = generateJson(currentType.value)
+    if (json) {
+      saveForm.jsonText = JSON.stringify(json, null, 2)
+    } else {
+      saveForm.jsonText = ''
     }
   }
 })
@@ -345,6 +381,17 @@ watch(() => addForm.description, () => {
 // 清空
 const handleClear = () => {
   options.value = []
+  currentType.value = 'select'
+  isEditMode.value = false
+  editingId.value = 0
+}
+
+// 取消编辑
+const handleCancelEdit = () => {
+  options.value = []
+  currentType.value = 'select'
+  isEditMode.value = false
+  editingId.value = 0
 }
 
 // 格式化JSON参数
@@ -407,51 +454,51 @@ const handleCopyJson = async (jsonParam: string) => {
   }
 }
 
-// 添加JSON
-const handleAddJson = async () => {
-  if (!addForm.description) {
+// 保存JSON（新增或更新）
+const handleSaveJson = async () => {
+  if (!saveForm.description) {
     ElMessage.warning('请选择类型')
     return
   }
   
   // 如果jsonText为空，重新生成
-  if (!addForm.jsonText || addForm.jsonText.trim() === '') {
+  if (!saveForm.jsonText || saveForm.jsonText.trim() === '') {
     // 如果是count类型，直接生成
-    if (addForm.description === 'count') {
+    if (saveForm.description === 'count') {
       const json = generateJson('count')
       if (!json) {
         ElMessage.error('生成JSON失败')
         return
       }
-      addForm.jsonText = JSON.stringify(json, null, 2)
+      saveForm.jsonText = JSON.stringify(json, null, 2)
     } else {
       // 选择和排它类型需要选项
       if (options.value.length === 0) {
         ElMessage.warning('请先添加选项')
-      return
-    }
-    const json = generateJson()
-    if (!json) {
+        return
+      }
+      const json = generateJson(saveForm.description)
+      if (!json) {
         ElMessage.error('生成JSON失败，请检查选项配置')
-      return
-    }
-    addForm.jsonText = JSON.stringify(json, null, 2)
+        return
+      }
+      saveForm.jsonText = JSON.stringify(json, null, 2)
     }
   }
   
   // 验证JSON格式
   try {
-    const parsed = JSON.parse(addForm.jsonText)
+    const parsed = JSON.parse(saveForm.jsonText)
     const validTypes = ['count', 'select', 'exclusive', 'exclude']
     if (!validTypes.includes(parsed.type) || !Array.isArray(parsed.data)) {
       ElMessage.error('JSON格式错误，需要type为count/select/exclusive/exclude且data为数组')
       return
     }
     // 确保JSON中的type与选择的type一致
-    if (parsed.type !== addForm.description) {
+    if (parsed.type !== saveForm.description) {
       ElMessage.warning('JSON类型与选择的类型不一致，已自动更新')
-      parsed.type = addForm.description
-      addForm.jsonText = JSON.stringify(parsed, null, 2)
+      parsed.type = saveForm.description
+      saveForm.jsonText = JSON.stringify(parsed, null, 2)
     }
   } catch (error) {
     ElMessage.error('JSON格式错误，请检查')
@@ -461,20 +508,46 @@ const handleAddJson = async () => {
   try {
     loading.value = true
     // 将类型值转换为中文label作为描述传给后端
-    const descriptionText = typeMap[addForm.description] || addForm.description
-    const res = await addJson({
-      jsonText: addForm.jsonText,
-      description: descriptionText
-    })
-    if (res.code === 200) {
-      ElMessage.success('添加成功')
-      addDialogVisible.value = false
-      addForm.description = 'select'
-      addForm.jsonText = ''
-      getListData()
+    const descriptionText = typeMap[saveForm.description] || saveForm.description
+    
+    if (isEditMode.value) {
+      // 更新模式
+      const res = await updateJson({
+        id: saveForm.id,
+        jsonText: saveForm.jsonText,
+        description: descriptionText
+      })
+      if (res.code === 200) {
+        ElMessage.success('更新成功')
+        saveDialogVisible.value = false
+        // 重置编辑状态
+        isEditMode.value = false
+        editingId.value = 0
+        options.value = []
+        currentType.value = 'select'
+        saveForm.id = 0
+        saveForm.description = 'select'
+        saveForm.jsonText = ''
+        getListData()
+      }
+    } else {
+      // 新增模式
+      const res = await addJson({
+        jsonText: saveForm.jsonText,
+        description: descriptionText
+      })
+      if (res.code === 200) {
+        ElMessage.success('添加成功')
+        saveDialogVisible.value = false
+        saveForm.description = 'select'
+        saveForm.jsonText = ''
+        currentType.value = 'select'
+        options.value = []
+        getListData()
+      }
     }
   } catch (error) {
-    ElMessage.error('添加失败')
+    ElMessage.error(isEditMode.value ? '更新失败' : '添加失败')
   } finally {
     loading.value = false
   }
@@ -495,7 +568,7 @@ const getListData = async () => {
   }
 }
 
-// 加载JSON
+// 加载JSON（用于加载到选项配置区域，不进入编辑模式）
 const handleLoadJson = (row: any) => {
   try {
     const jsonParam = JSON.parse(row.jsonParam)
@@ -510,7 +583,11 @@ const handleLoadJson = (row: any) => {
     // 将exclude标准化为exclusive
     const jsonType = jsonParam.type === 'exclude' ? 'exclusive' : jsonParam.type
     const descriptionValue = typeReverseMap[row.description] || jsonType
-    addForm.description = descriptionValue
+    currentType.value = descriptionValue
+    
+    // 重置编辑模式
+    isEditMode.value = false
+    editingId.value = 0
     
     // 如果是count类型，清空选项
     if (jsonParam.type === 'count') {
@@ -526,12 +603,55 @@ const handleLoadJson = (row: any) => {
         name: item.name || '',
         score: item.score || 0
       }))
-    ElMessage.success('加载成功')
+      ElMessage.success('加载成功')
     } else {
       ElMessage.warning('JSON格式不正确，data应为数组')
     }
   } catch (error) {
     ElMessage.error('加载失败')
+  }
+}
+
+// 编辑JSON - 加载数据到选项配置区域
+const handleEditJson = (row: any) => {
+  try {
+    const jsonParam = JSON.parse(row.jsonParam)
+    const validTypes = ['count', 'select', 'exclusive', 'exclude']
+    
+    if (!validTypes.includes(jsonParam.type)) {
+      ElMessage.warning('JSON格式不正确，需要type为count/select/exclusive/exclude的格式')
+      return
+    }
+    
+    // 设置编辑模式
+    isEditMode.value = true
+    editingId.value = row.id
+    
+    // 将exclude标准化为exclusive
+    const jsonType = jsonParam.type === 'exclude' ? 'exclusive' : jsonParam.type
+    const descriptionValue = typeReverseMap[row.description] || jsonType
+    currentType.value = descriptionValue
+    
+    // 如果是count类型，清空选项
+    if (jsonParam.type === 'count') {
+      options.value = []
+    } else {
+      // 如果是select、exclusive或exclude类型，加载选项
+      if (Array.isArray(jsonParam.data)) {
+        options.value = jsonParam.data.map((item: any, index: number) => ({
+          id: Date.now() + index + Math.random(),
+          name: item.name || '',
+          score: item.score || 0
+        }))
+      } else {
+        ElMessage.warning('JSON格式不正确，data应为数组')
+        return
+      }
+    }
+    
+    ElMessage.success('已加载到编辑区域，请修改后点击"更新配置"')
+  } catch (error) {
+    ElMessage.error('加载数据失败')
   }
 }
 
