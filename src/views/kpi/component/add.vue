@@ -18,8 +18,8 @@
               <el-date-picker
                 v-model="ruleForm.timeRange"
                 type="datetimerange"
-                start-placeholder="开始时间"
-                end-placeholder="结束时间"
+                start-placeholder="创建时间"
+                end-placeholder="截止时间"
                 range-separator="-"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 format="YYYY-MM-DD HH:mm:ss"

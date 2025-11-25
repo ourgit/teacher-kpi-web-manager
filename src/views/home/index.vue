@@ -50,7 +50,7 @@
       </div>
     </el-card>
     <fileDialog ref="fileDialogRef" @refresh="getListData"/>
-    <addDialog ref="addDialoggRef" @refresh="getListData"/>
+    <addDialog ref="addDialogRef" @refresh="getListData"/>
     <deleteDialog ref="deleteDialogRef" @refresh="getListData"/>
   </div>
 </template>
