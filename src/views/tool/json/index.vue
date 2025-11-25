@@ -77,9 +77,53 @@
       <el-table :data="jsonList" v-loading="loading" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="description" label="描述" show-overflow-tooltip />
-        <el-table-column prop="jsonParam" label="JSON参数" show-overflow-tooltip>
+        <el-table-column prop="jsonParam" label="JSON参数" min-width="400">
           <template #default="{ row }">
-            <pre>{{ formatJsonParam(row.jsonParam) }}</pre>
+            <div class="json-display-wrapper" :class="{ 'is-exclusive': getJsonType(row.jsonParam) === 'exclusive' }">
+              <div class="json-display-header">
+                <span class="json-type-badge" :class="getJsonTypeClass(row.jsonParam)">
+                  {{ getJsonTypeLabel(row.jsonParam) }}
+                </span>
+                <el-button
+                  size="small"
+                  text
+                  type="primary"
+                  :icon="DocumentCopy"
+                  @click="handleCopyJson(row.jsonParam)"
+                >
+                  复制JSON
+                </el-button>
+              </div>
+              <div class="json-display-content">
+                <div class="json-preview">
+                  <template v-if="getJsonType(row.jsonParam) === 'count'">
+                    <div class="json-preview-item">
+                      <el-icon class="preview-icon"><Document /></el-icon>
+                      <span class="preview-text">计分类型：无需选项配置</span>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="json-preview-title">选项列表：</div>
+                    <div class="json-preview-options">
+                      <div
+                        v-for="(item, index) in getJsonOptions(row.jsonParam)"
+                        :key="index"
+                        class="json-preview-option"
+                      >
+                        <el-tag class="option-index-tag" size="small">{{ index + 1 }}</el-tag>
+                        <span class="option-name">{{ item.name }}</span>
+                        <el-tag type="success" size="small" class="option-score-tag">
+                          分数：{{ item.score }}
+                        </el-tag>
+                      </div>
+                      <div v-if="getJsonOptions(row.jsonParam).length === 0" class="empty-options">
+                        暂无选项
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
           </template>
         </el-table-column>
           <el-table-column fixed="right" label="操作" width="150">
@@ -123,7 +167,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+import { Delete, ArrowUp, ArrowDown, DocumentCopy, Document } from '@element-plus/icons-vue'
+import useClipboard from 'vue-clipboard3'
 import { addJson, getJsonList, deleteJson } from '@/api/tool/index'
 
 interface OptionItem {
@@ -136,7 +181,8 @@ interface OptionItem {
 const typeMap: Record<string, string> = {
   count: '计分',
   select: '选择',
-  exclusive: '排它'
+  exclusive: '排它',
+  exclude: '排它'
 }
 
 // 类型反向映射：中文名称 -> 英文值
@@ -305,6 +351,56 @@ const formatJsonParam = (jsonParam: string) => {
   }
 }
 
+// 获取JSON类型
+const getJsonType = (jsonParam: string): string => {
+  try {
+    const parsed = JSON.parse(jsonParam)
+    const type = parsed.type || 'unknown'
+    // 将 exclude 标准化为 exclusive
+    return type === 'exclude' ? 'exclusive' : type
+  } catch {
+    return 'unknown'
+  }
+}
+
+// 获取JSON类型标签
+const getJsonTypeLabel = (jsonParam: string): string => {
+  const type = getJsonType(jsonParam)
+  return typeMap[type] || type
+}
+
+// 获取JSON类型样式类
+const getJsonTypeClass = (jsonParam: string): string => {
+  const type = getJsonType(jsonParam)
+  // exclude 和 exclusive 使用相同的样式
+  return type === 'exclusive' ? 'type-exclusive' : `type-${type}`
+}
+
+// 获取JSON选项列表
+const getJsonOptions = (jsonParam: string): Array<{ name: string; score: number }> => {
+  try {
+    const parsed = JSON.parse(jsonParam)
+    if (parsed.type === 'count') {
+      return []
+    }
+    return Array.isArray(parsed.data) ? parsed.data : []
+  } catch {
+    return []
+  }
+}
+
+// 复制JSON
+const { toClipboard } = useClipboard()
+const handleCopyJson = async (jsonParam: string) => {
+  try {
+    const formattedJson = formatJsonParam(jsonParam)
+    await toClipboard(formattedJson)
+    ElMessage.success('复制成功')
+  } catch (error) {
+    ElMessage.error('复制失败')
+  }
+}
+
 // 添加JSON
 const handleAddJson = async () => {
   if (!addForm.description) {
@@ -340,9 +436,9 @@ const handleAddJson = async () => {
   // 验证JSON格式
   try {
     const parsed = JSON.parse(addForm.jsonText)
-    const validTypes = ['count', 'select', 'exclusive']
+    const validTypes = ['count', 'select', 'exclusive', 'exclude']
     if (!validTypes.includes(parsed.type) || !Array.isArray(parsed.data)) {
-      ElMessage.error('JSON格式错误，需要type为count/select/exclusive且data为数组')
+      ElMessage.error('JSON格式错误，需要type为count/select/exclusive/exclude且data为数组')
       return
     }
     // 确保JSON中的type与选择的type一致
@@ -397,15 +493,17 @@ const getListData = async () => {
 const handleLoadJson = (row: any) => {
   try {
     const jsonParam = JSON.parse(row.jsonParam)
-    const validTypes = ['count', 'select', 'exclusive']
+    const validTypes = ['count', 'select', 'exclusive', 'exclude']
     
     if (!validTypes.includes(jsonParam.type)) {
-      ElMessage.warning('JSON格式不正确，需要type为count/select/exclusive的格式')
+      ElMessage.warning('JSON格式不正确，需要type为count/select/exclusive/exclude的格式')
       return
     }
     
     // 设置类型：如果row.description是中文，转换为英文值；否则使用JSON中的type
-    const descriptionValue = typeReverseMap[row.description] || jsonParam.type
+    // 将exclude标准化为exclusive
+    const jsonType = jsonParam.type === 'exclude' ? 'exclusive' : jsonParam.type
+    const descriptionValue = typeReverseMap[row.description] || jsonType
     addForm.description = descriptionValue
     
     // 如果是count类型，清空选项
@@ -415,7 +513,7 @@ const handleLoadJson = (row: any) => {
       return
     }
     
-    // 如果是select或exclusive类型，加载选项
+    // 如果是select、exclusive或exclude类型，加载选项
     if (Array.isArray(jsonParam.data)) {
       options.value = jsonParam.data.map((item: any, index: number) => ({
         id: Date.now() + index + Math.random(),
@@ -556,11 +654,162 @@ onMounted(() => {
     border-top: 1px solid #dcdfe6;
   }
 
-  pre {
-    margin: 0;
-    font-size: 12px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+  .json-display-wrapper {
+    position: relative;
+    border: 1px solid #e4e7ed;
+    border-radius: 6px;
+    background-color: #ffffff;
+    transition: all 0.3s;
+    overflow: hidden;
+
+    &:hover {
+      border-color: #409eff;
+      box-shadow: 0 2px 12px rgba(64, 158, 255, 0.15);
+    }
+
+    // 排它类型特殊样式
+    &.is-exclusive {
+      border-color: #f56c6c;
+      box-shadow: 0 0 0 1px rgba(245, 108, 108, 0.1);
+
+      &:hover {
+        border-color: #f56c6c;
+        box-shadow: 0 2px 12px rgba(245, 108, 108, 0.2);
+      }
+
+      .json-display-header {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+        border-bottom-color: #f56c6c;
+      }
+    }
+
+    .json-display-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+      border-bottom: 1px solid #e4e7ed;
+
+      .json-type-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #fff;
+
+        &.type-count {
+          background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+        }
+
+        &.type-select {
+          background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+        }
+
+        &.type-exclusive {
+          background: linear-gradient(135deg, #f56c6c 0%, #ff7875 100%);
+          box-shadow: 0 2px 6px rgba(245, 108, 108, 0.3);
+          font-weight: 600;
+          border: 1px solid rgba(245, 108, 108, 0.3);
+        }
+
+        &.type-unknown {
+          background: #909399;
+        }
+      }
+    }
+
+    .json-display-content {
+      padding: 16px;
+      background-color: #ffffff;
+
+      .json-preview {
+        .json-preview-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px;
+          background-color: #f0f9ff;
+          border-radius: 6px;
+          border-left: 3px solid #409eff;
+
+          .preview-icon {
+            font-size: 18px;
+            color: #409eff;
+          }
+
+          .preview-text {
+            color: #606266;
+            font-size: 14px;
+          }
+        }
+
+        .json-preview-title {
+          font-size: 14px;
+          font-weight: 500;
+          color: #303133;
+          margin-bottom: 12px;
+        }
+
+        .json-preview-options {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          .json-preview-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 1px solid #e4e7ed;
+            border-radius: 6px;
+            transition: all 0.3s;
+
+            &:hover {
+              border-color: #409eff;
+              background: linear-gradient(135deg, #ecf5ff 0%, #ffffff 100%);
+              box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
+            }
+
+            .option-index-tag {
+              min-width: 28px;
+              text-align: center;
+              background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+              border: none;
+              color: #fff;
+              font-weight: 500;
+              margin-right: 10px;
+              flex-shrink: 0;
+            }
+
+            .option-name {
+              font-size: 14px;
+              color: #303133;
+              font-weight: 500;
+              margin-right: 8px;
+            }
+
+            .option-score-tag {
+              background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+              border: none;
+              color: #fff;
+              font-weight: 500;
+              flex-shrink: 0;
+            }
+          }
+
+          .empty-options {
+            text-align: center;
+            padding: 20px;
+            color: #909399;
+            font-size: 14px;
+          }
+        }
+      }
+    }
   }
+
 }
 </style>

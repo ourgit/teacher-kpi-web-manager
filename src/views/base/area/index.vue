@@ -29,7 +29,7 @@
               <el-icon>
                 <ele-Plus />
               </el-icon>
-              新增校区
+              新增学校
             </el-button>
           </el-form-item>
         </el-row>
@@ -37,7 +37,7 @@
       <el-table :data="list" v-loading="loading" style="width: 100%">
         <el-table-column prop="id" label="ID" width="100">
         </el-table-column>
-        <el-table-column prop="name" label="校区名称" show-overflow-tooltip>
+        <el-table-column prop="name" label="学校名称" show-overflow-tooltip>
         </el-table-column>
         <el-table-column prop="contactNumber" label="联系电话" show-overflow-tooltip>
         </el-table-column>
@@ -135,7 +135,7 @@ const refreshQuery = () => {
 
 // 删除
 const onRowDel = (row: any) => {
-  ElMessageBox.confirm(`您确定要删除此校区吗?`, '提示', {
+  ElMessageBox.confirm(`您确定要删除此学校吗?`, '提示', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
     type: 'warning',

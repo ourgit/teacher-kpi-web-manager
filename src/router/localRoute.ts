@@ -307,7 +307,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
             name: 'JsonIndex',
             component: () => import('@/views/tool/json/index.vue'),
             meta: {
-              title: '动态生成json',
+              title: '考核等级json配置',
               isLink: '',
               isHide: false,
               isKeepAlive: true,

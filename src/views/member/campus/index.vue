@@ -7,8 +7,8 @@
         </div>
       </template>
       <el-form :inline="true" :model="queryForm" class="query-form">
-        <el-form-item label="校区名称">
-          <el-input v-model="queryForm.campusName" placeholder="请输入校区名称" clearable />
+        <el-form-item label="学校名称">
+          <el-input v-model="queryForm.campusName" placeholder="请输入学校名称" clearable />
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="queryForm.status" placeholder="请选择状态" clearable style="width: 200px">
@@ -34,7 +34,7 @@
         </el-form-item>
       </el-form>
       <el-table :data="filteredList" v-loading="loading" border style="width: 100%">
-        <el-table-column prop="campusName" label="校区名称" show-overflow-tooltip />
+        <el-table-column prop="campusName" label="学校名称" show-overflow-tooltip />
         <el-table-column prop="address" label="地址" show-overflow-tooltip />
         <el-table-column prop="phone" label="联系电话" width="140" />
         <el-table-column prop="principal" label="负责人" width="120" />
@@ -64,8 +64,8 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" destroy-on-close>
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="110px">
-        <el-form-item label="校区名称" prop="campusName">
-          <el-input v-model="formData.campusName" placeholder="请输入校区名称" />
+        <el-form-item label="学校名称" prop="campusName">
+          <el-input v-model="formData.campusName" placeholder="请输入学校名称" />
         </el-form-item>
         <el-form-item label="详细地址" prop="address">
           <el-input v-model="formData.address" placeholder="请输入详细地址" />
@@ -152,7 +152,7 @@ function initFormData(): CampusItem {
 }
 
 const rules: FormRules = {
-  campusName: [{ required: true, message: '请输入校区名称', trigger: 'blur' }],
+  campusName: [{ required: true, message: '请输入学校名称', trigger: 'blur' }],
   address: [{ required: true, message: '请输入详细地址', trigger: 'blur' }],
   phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
   principal: [{ required: true, message: '请输入负责人姓名', trigger: 'blur' }],

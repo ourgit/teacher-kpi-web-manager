@@ -14,8 +14,8 @@
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
-            <el-form-item label="校区名称" prop="name">
-              <el-input v-model="ruleForm.name" placeholder="请输入校区名称" clearable></el-input>
+            <el-form-item label="学校名称" prop="name">
+              <el-input v-model="ruleForm.name" placeholder="请输入学校名称" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
@@ -99,7 +99,7 @@ const state = reactive({
   loading: false,
   ruleForm: {} as any,
   rules: {
-    name: [{ required: true, trigger: 'blur', message: '请填写校区名称' }],
+    name: [{ required: true, trigger: 'blur', message: '请填写学校名称' }],
     contactNumber: [{ required: true, trigger: 'blur', message: '请填写联系电话' }],
     contactName: [{ required: true, trigger: 'blur', message: '请填写联系人' }],
     address: [{ required: true, trigger: 'blur', message: '请填写地址' }],

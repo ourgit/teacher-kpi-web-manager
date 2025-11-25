@@ -25,7 +25,17 @@
       </el-form>
       <el-table :data="list" v-loading="loading" style="width: 100%">
         <el-table-column prop="id" label="Id" style="text-align: center;"/>
-        <el-table-column prop="title" label="标题" style="text-align: center;"></el-table-column>
+        <el-table-column prop="title" label="标题" style="text-align: center;"/>
+        <el-table-column label="创建时间" style="text-align: center;">
+          <template #default="{ row }">
+            {{ formatDate(row.createTime, 'YYYY-mm-dd HH:MM:SS') }}
+          </template>
+        </el-table-column>
+        <el-table-column label="截至时间" style="text-align: center;">
+          <template #default="{ row }">
+            {{ formatDate(row.endTime, 'YYYY-mm-dd HH:MM:SS') }}
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" style="text-align: center;">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
