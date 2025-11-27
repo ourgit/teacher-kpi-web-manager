@@ -16,12 +16,22 @@
       >
         <el-row :gutter="35">
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
-            <el-form-item label="分数" prop="score">
+            <el-form-item label="分数" prop="score" v-if="showQualificationSelect()">
               <el-input
                 v-model="ruleForm.data.score"
                 placeholder="请输入分数"
                 clearable
               ></el-input>
+            </el-form-item>
+            <el-form-item label="选项" prop="score" v-else>
+                <el-radio-group v-model="ruleForm.data.score">
+                  <el-radio label="5000" size="large">
+                  <span class="qualified-text">合格</span>
+                </el-radio>
+                <el-radio label="-5000" size="large">
+                  <span class="unqualified-text">不合格</span>
+                </el-radio>
+              </el-radio-group>  
             </el-form-item>
           </el-col>
         </el-row>
@@ -125,6 +135,14 @@ const state = reactive({
 })
 
 const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
+
+const showQualificationSelect = ()=>{
+  if(state.ruleForm.data.score>=5000||state.ruleForm.data.score<=-5000){
+    return false;
+  }else{
+    return true;
+  }
+}
 
 const downloadFile = (row: any) => {
   try {
@@ -236,3 +254,14 @@ defineExpose({
 })
 </script>
 
+<style scoped>
+.qualified-text {
+  color: #67c23a;
+  font-weight: 500;
+}
+
+.unqualified-text {
+  color: #f56c6c;
+  font-weight: 500;
+}
+</style>

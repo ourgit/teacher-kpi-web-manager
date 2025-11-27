@@ -54,8 +54,7 @@ import { reactive, ref } from 'vue'
 import { ElForm, ElMessage, ElMessageBox, ElLoading  } from 'element-plus'
 import { downloadPdfFromStream } from '@/utils/fileDownload'
 import { exportPDF, checkExportFormat } from '@/api/home/index'
-import { getKPIListGet } from '@/api/kpi/index'
-import { fa } from 'element-plus/es/locale'
+import { getKPIListUserId } from '@/api/kpi/index'
 
 const loading = ref(false)
 const loadingWithProgress = ref(false)
@@ -77,9 +76,10 @@ const state = reactive({
 })
 
 const getKPI=()=>{
-    getKPIListGet({
-    }).then((data:any)=>{
+    getKPIListUserId(state.ruleForm)
+    .then((data:any)=>{
         state.kpiList=data.list;
+        state.isShowDialog = state.kpiList && state.kpiList.length > 0
     }).catch(()=>{
         console.error("出错");
     })
@@ -87,9 +87,8 @@ const getKPI=()=>{
 
 // 打开弹窗
 const openDialog = (row: any) => {
-    state.isShowDialog = true
     state.ruleForm={
-        userId:row.id,
+      userId:row.id,
     }
     getKPI()
 }

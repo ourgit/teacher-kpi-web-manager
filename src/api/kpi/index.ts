@@ -22,6 +22,13 @@ export function getKPIListGet(data: object) {
   })
 }
 
+export function getKPIListUserId(data: object) {
+  return request({
+    url: '/v1/tk/teacher/kpi/list/',
+    method: 'post',
+    data,
+  })
+}
 /**
  * 添加KPI
  */
