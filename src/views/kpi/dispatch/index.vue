@@ -48,7 +48,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="page-bottom">
+      <div class="page-bottom" v-if="totalPage > 0">
         <el-pagination v-model:currentPage="currentPage" background layout="prev, pager, next, jumper" :page-count="totalPage" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
     </el-card>
@@ -97,19 +97,33 @@ const getListData = () => {
   }
   const formData = state.queryData
   getTeacherListDispatch({
+    page: state.currentPage,
     ...formData,
   }).then((data: any) => {
+    console.log(data)
     state.loading = false
-    state.list = data.data
+    state.list = data.data || data.list || []
+    // 更新总页数，优先使用 pages，如果没有则根据数据量计算或设为1
+    if (data.pages !== undefined && data.pages !== null) {
+      state.totalPage = data.pages > 0 ? data.pages : 1
+    } else if (state.currentPage === 1) {
+      // 如果第一页没有返回 pages，但有数据，至少显示1页
+      state.totalPage = state.list.length > 0 ? 1 : 0
+    }
     if (state.currentPage === 1) {
-      state.totalPage = data.pages
       state.totalMembers = data.totalMembers
       state.totalBalance = data.totalBalance
     }
     state.submitData = state.queryData
   }).catch(() => {
     state.loading = false
-    state.queryData.filter = JSON.parse(state.queryData.filter)
+    if (state.queryData.filter && typeof state.queryData.filter === 'string') {
+      try {
+        state.queryData.filter = JSON.parse(state.queryData.filter)
+      } catch (e) {
+        // 解析失败时忽略
+      }
+    }
   })
 }
 

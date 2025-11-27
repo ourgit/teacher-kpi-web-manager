@@ -8,7 +8,7 @@
               <el-icon color="#e6a23c" size="20">
                 <ele-Warning />
               </el-icon>
-              <span class="confirm-message">确认撤销？</span>
+              <span class="confirm-message">确认全部撤销？</span>
             </el-form-item>
           </el-col>
         </el-row>
