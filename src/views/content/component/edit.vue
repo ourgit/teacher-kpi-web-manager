@@ -21,6 +21,16 @@
               </el-select>
             </el-form-item>
           </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="封顶" prop="topScore">
+              <el-input v-model="ruleForm.data[0].topScore" placeholder="请输入封顶" clearable></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="封底" prop="bottomScore">
+              <el-input v-model="ruleForm.data[0].bottomScore" placeholder="请输入封底" clearable></el-input>
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       <template #footer>
