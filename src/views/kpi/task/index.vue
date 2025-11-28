@@ -129,10 +129,14 @@ const getListData = () => {
   const formData = state.queryData
   getLeaderTask({
     userId:Session.getString("uid"),
-    ...formData
+    page: state.currentPage,
+    ...formData,
   }).then((data: any) => {
     state.loading = false
     state.list = data.data
+    if (state.currentPage === 1 && data.pages > 0) {
+      state.totalPage = data.pages
+    }
     state.submitData = state.queryData
   }).catch(() => {
     state.loading = false

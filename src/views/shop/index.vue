@@ -195,9 +195,6 @@ const onRowDel = (row: any) => {
     .catch(() => { })
 }
 
-
-
-
 // 打开修改弹窗
 const onOpenEdit = (type: string, row: any) => {
   detailDialogRef.value.openDialog(type, row)

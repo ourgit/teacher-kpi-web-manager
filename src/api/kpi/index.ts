@@ -89,7 +89,7 @@ export function dispatch(data: object) {
  */
 export function getTeacherListDispatch(data: object) {
   return request({
-    url: '/v1/tk/teacher/list/dispatch/',
+    url: '/v1/tk/dispatch/list/',
     method: 'post',
     data,
   })
@@ -100,7 +100,7 @@ export function getTeacherListDispatch(data: object) {
  */
 export function withDraw(data: object) {
   return request({
-    url: '/v1/tk/withDraw/',
+    url: '/v1/tk/withDraw/other/',
     method: 'post',
     data,
   })

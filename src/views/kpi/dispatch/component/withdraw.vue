@@ -2,16 +2,15 @@
   <div class="dialog-container">
     <el-dialog title="撤销列表" v-model="isShowDialog" width="500px" :close-on-click-modal="false" :destroy-on-close="true">
       <el-form ref="dialogFormRef" :model="ruleForm" :rules="rules" size="default" label-width="120px">
-        <el-row :gutter="35">
-          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
-            <el-form-item>
-              <el-icon color="#e6a23c" size="20">
-                <ele-Warning />
-              </el-icon>
-              <span class="confirm-message">确认撤销？</span>
-            </el-form-item>
-          </el-col>
-        </el-row>
+        <el-table 
+          :data="state.kpiList" 
+          v-loading="loading" 
+          style="width: 100%;height: 200px"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column type="selection" width="55" align="center"/>
+          <el-table-column prop="title" label="KPI名称" align="center"/>
+        </el-table>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -27,7 +26,7 @@
 <script setup lang="ts">
 import { reactive, toRefs, ref } from 'vue'
 import { ElForm, ElMessage } from 'element-plus'
-import { withDraw } from '@/api/kpi/index'
+import { withDraw,getKPIListUserId } from '@/api/kpi/index'
 
 // 定义子组件向父组件传值/事件
 const emit = defineEmits(['refresh'])
@@ -39,17 +38,35 @@ const state = reactive({
   ruleForm: {} as any,
   rules: {
   },
+  kpiList:[] as any,
+  selectedKpiList:[] as any,
   isShowDialog: false
 })
 
 const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
 
+const getKPIList=()=>{
+  getKPIListUserId({
+    userId:state.ruleForm.teacherId
+  })
+  .then((data:any)=>{
+    state.kpiList=data.list;
+  }).catch(()=>{
+    console.error("系统出错");
+  })
+}
+
+const handleSelectionChange = (selectedRows: []) => {
+  state.selectedKpiList = selectedRows
+}
+
 // 打开弹窗
 const openDialog = (row: any) => {
   state.isShowDialog = true
   state.ruleForm = {
-    teacherIds:row.id
+    teacherId:row.id
   }
+  getKPIList();
 }
 
 // 关闭弹窗
@@ -63,6 +80,12 @@ const onCancel = () => {
 
 // 提交
 const onSubmit = () => {
+  if (state.selectedKpiList.length === 0) {
+        ElMessage.warning('请至少选择一个KPI');
+        return
+  }
+  const selectedIds = state.selectedKpiList.map((kpi:any) => kpi.id);
+  state.ruleForm.kpiIds=selectedIds.join(',');
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true

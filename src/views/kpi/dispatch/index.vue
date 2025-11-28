@@ -11,16 +11,6 @@
         <el-form-item label="用户姓名">
           <el-input v-model="queryData.userName" size="default" placeholder="请输入用户姓名" clearable/>
         </el-form-item>
-        <el-form-item label="职业名称">
-          <el-input v-model="queryData.typeName" size="default" placeholder="请输入职业名称" clearable/>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="queryData.roleId" size="default" placeholder="会员等级" clearable>
-            <el-option label="全部" :value="0" />
-            <el-option label="正常" :value="1" />
-            <el-option label="禁用" :value="2" />
-          </el-select>
-        </el-form-item>
         <el-form-item>
           <el-button size="default" type="primary" @click="getListData">
             <el-icon>
@@ -34,12 +24,19 @@
         <el-table-column prop="id" label="Id" width="120" />
         <el-table-column prop="phone" label="手机号码" show-overflow-tooltip width="130"/>
         <el-table-column prop="userName" label="用户姓名" show-overflow-tooltip/>
-        <el-table-column prop="typeName" label="职业名称" show-overflow-tooltip/>
-        <el-table-column prop="role.nickName" label="角色类型" show-overflow-tooltip width="120"/>
-        <el-table-column fixed="right" label="状态" show-overflow-tooltip width="100">
+        <el-table-column prop="kpiList" label="已下发的KPI" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-tag type="success" v-if="row.status === 1">正常</el-tag>
-            <el-tag v-if="row.status === 2">禁用</el-tag>
+            <div class="parent-tags" v-if="row.kpiList.length">
+              <el-tag
+                v-for="(kpi, idx) in row.kpiList"
+                :key="idx"
+                type="info"
+                effect="light"
+              >
+                {{ kpi.title }}
+              </el-tag>
+            </div>
+            <span v-else>—</span>
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
@@ -75,11 +72,9 @@ const state = reactive({
   currentPage: 1,
   totalPage: 1,
   queryData: {
-    filter: '',
-    uid: '',
-    orgId: '',
-    shopId: '',
-    status: ''
+    id: '',
+    phone: '',
+    userName: '',
   } as any,
   submitData: {},
   roleList: [] as any,
@@ -95,21 +90,19 @@ const getListData = () => {
   if (JSON.stringify(state.queryData) !== JSON.stringify(state.submitData)) {
     state.currentPage = 1
   }
-  const formData = state.queryData
+  const formData = JSON.parse(JSON.stringify(state.queryData))
   getTeacherListDispatch({
+    page: state.currentPage,
     ...formData,
   }).then((data: any) => {
     state.loading = false
-    state.list = data.data
-    if (state.currentPage === 1) {
+    state.list = data.list
+    if (state.currentPage === 1 && data.pages > 0) {
       state.totalPage = data.pages
-      state.totalMembers = data.totalMembers
-      state.totalBalance = data.totalBalance
     }
-    state.submitData = state.queryData
+    state.submitData = JSON.parse(JSON.stringify(state.queryData))
   }).catch(() => {
     state.loading = false
-    state.queryData.filter = JSON.parse(state.queryData.filter)
   })
 }
 

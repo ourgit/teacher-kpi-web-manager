@@ -34,7 +34,7 @@ export default defineConfig({
     proxy: {
       '/v1/': {
         target: 'http://120.48.81.209',
-        //target:'http://127.0.0.1:9000',
+        // target:'http://127.0.0.1:9000',
         changeOrigin: true,
       }
     },
