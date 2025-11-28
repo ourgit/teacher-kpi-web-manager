@@ -41,10 +41,9 @@
             {{ formatDate(row.createdTime, 'YYYY-mm-dd HH:MM:SS') }}
           </template>
         </el-table-column> -->
-
         <el-table-column prop="topScore" label="封顶" style="text-align: center;"/>
         <el-table-column prop="bottomScore" label="封底" style="text-align: center;"/>
-
+        <el-table-column prop="kpiScoreType.description" label="得分类型" style="text-align: center;"></el-table-column>
         <el-table-column fixed="right" label="操作" style="text-align: center;">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>

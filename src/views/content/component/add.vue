@@ -10,7 +10,27 @@
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="分权" prop="score">
-              <el-input v-model="ruleForm.score" placeholder="请输入分权" clearable></el-input>
+              <el-input-number
+                v-model="ruleForm.score"
+                :step="0.5"
+                :precision="2"
+                controls-position="right"
+                placeholder="请输入分权"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="得分类型" prop="typeId">
+              <el-select v-model="ruleForm.typeId" placeholder="请选择得分类型" clearable>
+                <el-option label="请选择得分类型" :value="0" />
+                <el-option
+                  v-for="item in state.scoreTypeList"
+                  :key="item.id"
+                  :label="formatScoreTypeLabel(item)"
+                  :value="item.id"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
@@ -48,28 +68,42 @@ import { reactive, toRefs, ref } from 'vue'
 import { ElForm, ElMessage } from 'element-plus'
 import { addContent } from '@/api/content/index'
 import { getElementList } from '@/api/element/index'
+import { getJsonList } from '@/api/tool/index'
 
 
 // 定义子组件向父组件传值/事件
 const emit = defineEmits(['refresh'])
 
-function validateKpiId(rule: any, value: any, callback: any) {
-  if(value<=0){
-    callback(new Error('请填写要素'))
-  }else{
-    callback()
+function validateSelectRequired(message: string) {
+  return (rule: any, value: any, callback: any) => {
+    if (value <= 0 || value === undefined || value === null) {
+      callback(new Error(message))
+    } else {
+      callback()
+    }
   }
 }
 
 // 定义变量内容
 const dialogFormRef = ref(ElForm)
+const createDefaultForm = () => ({
+  content: '',
+  score: 0,
+  elementId: 0,
+  typeId: 0,
+  topScore: '',
+  bottomScore: '',
+})
+
 const state = reactive({
   loading: false,
-  ruleForm: {} as any,
+  ruleForm: createDefaultForm(),
   rules: {
-    elementId:[{ required: true, validator: validateKpiId}]
+    typeId: [{ required: true, validator: validateSelectRequired('请选择得分类型') }],
+    elementId:[{ required: true, validator: validateSelectRequired('请选择要素')}]
   },
   kpiList:[] as any,
+  scoreTypeList: [] as any,
   isShowDialog: false
 })
 
@@ -78,17 +112,40 @@ const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
 const getElement=()=>{
   getElementList({})
   .then((data: any) => {
-    state.kpiList=data.list
+    state.kpiList=data.list || []
   })
   .catch((e) => {
     console.error(e);
   })
 }
 
+const getScoreTypeList = () => {
+  getJsonList({})
+    .then((data: any) => {
+      state.scoreTypeList = data.list || []
+    })
+    .catch((e: any) => {
+      console.error(e)
+    })
+}
+
+const formatScoreTypeLabel = (item: any) => {
+  if (!item) return ''
+  if (item.description) return `${item.description}（ID: ${item.id}）`
+  return `类型ID：${item.id}`
+}
+
+const formatScoreValue = (value: number | string) => {
+  const num = Number(value || 0)
+  return num.toFixed(2)
+}
+
 // 打开弹窗
-const openDialog = (row: any) => {
+const openDialog = () => {
   state.isShowDialog = true
+  state.ruleForm = createDefaultForm()
   getElement()
+  getScoreTypeList()
 }
 
 // 关闭弹窗
@@ -105,7 +162,11 @@ const onSubmit = () => {
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true
-      addContent([state.ruleForm])
+      const payload = {
+        ...state.ruleForm,
+        score: formatScoreValue(state.ruleForm.score),
+      }
+      addContent([payload])
         .then(() => {
           ElMessage({
             message: '添加成功',
