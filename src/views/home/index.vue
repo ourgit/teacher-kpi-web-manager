@@ -38,7 +38,7 @@
         <el-table-column prop="phone" label="手机号码" show-overflow-tooltip width="130"/>
         <el-table-column prop="userName" label="用户姓名" show-overflow-tooltip/>
         <el-table-column prop="typeName" label="职业名称" show-overflow-tooltip/>
-        <el-table-column fixed="right" label="操作" width="100">
+        <el-table-column fixed="right" label="操作" width="120">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="onDelete(row)">删除</el-button>
             <el-button size="small" text type="primary" @click="onAudit(row)">导出评分</el-button>
