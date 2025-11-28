@@ -126,7 +126,7 @@ const getListData = () => {
   if (JSON.stringify(state.queryData) !== JSON.stringify(state.submitData)) {
     state.currentPage = 1
   }
-  const formData = state.queryData
+  const formData = JSON.parse(JSON.stringify(state.queryData))
   getLeaderTask({
     userId:Session.getString("uid"),
     page: state.currentPage,
@@ -137,7 +137,7 @@ const getListData = () => {
     if (state.currentPage === 1 && data.pages > 0) {
       state.totalPage = data.pages
     }
-    state.submitData = state.queryData
+    state.submitData = JSON.parse(JSON.stringify(state.queryData))
   }).catch(() => {
     state.loading = false
     state.queryData.filter = JSON.parse(state.queryData.filter)
