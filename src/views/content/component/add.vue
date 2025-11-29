@@ -88,7 +88,7 @@ function validateSelectRequired(message: string) {
 const dialogFormRef = ref(ElForm)
 const createDefaultForm = () => ({
   content: '',
-  score: 0,
+  score: '',
   elementId: 0,
   typeId: 0,
   topScore: '',
@@ -162,11 +162,7 @@ const onSubmit = () => {
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true
-      const payload = {
-        ...state.ruleForm,
-        score: formatScoreValue(state.ruleForm.score),
-      }
-      addContent([payload])
+      addContent(state.ruleForm)
         .then(() => {
           ElMessage({
             message: '添加成功',

@@ -4,14 +4,10 @@ import request from '@/utils/request'
  * 获取KPI列表
  */
 export function getKPIList(data?: object) {
-  return new Promise((resolve) => {
-    request({
-      url: '/v1/tk/getKpiList/',
-      method: 'post',
-      data,
-    }).then((data)=>{
-      resolve(data)
-    })
+  return request({
+    url: '/v1/tk/kpi/list/',
+    method: 'post',
+    data,
   })
 }
 export function getKPIListGet(data: object) {
@@ -45,7 +41,7 @@ export function addKpi(data: object) {
  */
 export function updateKpi(data: object) {
   return request({
-    url: '/v1/tk/update/',
+    url: '/v1/tk/kpi/update/',
     method: 'post',
     data,
   })

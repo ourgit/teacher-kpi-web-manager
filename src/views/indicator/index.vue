@@ -61,7 +61,6 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
-import { formatDate } from '@/utils/formatTime'
 import { getIndicatorList } from '@/api/indicator/index'
 import { getKPIList } from '@/api/kpi/index'
 import { storeToRefs } from 'pinia'
@@ -115,10 +114,9 @@ const getListData = () => {
   if (JSON.stringify(state.queryData) !== JSON.stringify(state.submitData)) {
     state.currentPage = 1
   }
-  const formData = state.queryData
+  const formData = JSON.parse(JSON.stringify(state.queryData))
   getIndicatorList({
-    currentPage:1,
-    pageSize:10,
+    page: state.currentPage,
     ...formData,
   }).then((data: any) => {
     state.loading = false

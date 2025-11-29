@@ -5,7 +5,7 @@ import request from '@/utils/request'
  */
 export function getContentList(data: object) {
   return request({
-    url: '/v1/tk/getContentList/',
+    url: '/v1/tk/content/list/',
     method: 'post',
     data,
   })
@@ -27,7 +27,7 @@ export function addContent(data: object) {
  */
 export function updateContent(data: object) {
   return request({
-    url: '/v1/tk/update/',
+    url: '/v1/tk/content/update/',
     method: 'post',
     data,
   })

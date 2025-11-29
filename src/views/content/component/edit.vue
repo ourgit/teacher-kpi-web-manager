@@ -1,21 +1,21 @@
 <template>
   <div class="dialog-container">
     <el-dialog title="更新内容" v-model="isShowDialog" width="500px" :close-on-click-modal="false" :destroy-on-close="true">
-      <el-form ref="dialogFormRef" :model="ruleForm.data[0]" :rules="rules" size="default" label-width="120px">
+      <el-form ref="dialogFormRef" :model="ruleForm" :rules="rules" size="default" label-width="120px">
         <el-row :gutter="35">
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="内容名" prop="content">
-              <el-input v-model="ruleForm.data[0].content" placeholder="请输入内容名" clearable></el-input>
+              <el-input v-model="ruleForm.content" placeholder="请输入内容名" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="分权" prop="score">
-              <el-input v-model="ruleForm.data[0].score" placeholder="请输入分权" clearable></el-input>
+              <el-input v-model="ruleForm.score" placeholder="请输入分权" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="得分类型" prop="typeId">
-              <el-select v-model="ruleForm.data[0].typeId" placeholder="请选择得分类型" clearable>
+              <el-select v-model="ruleForm.typeId" placeholder="请选择得分类型" clearable>
                 <el-option label="请选择得分类型" :value="0" />
                 <el-option
                   v-for="item in state.scoreTypeList"
@@ -28,7 +28,7 @@
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="要素" prop="elementId">
-              <el-select v-model="ruleForm.data[0].elementId" placeholder="选择要素" clearable>
+              <el-select v-model="ruleForm.elementId" placeholder="选择要素" clearable>
                 <el-option label="选择要素" :value="0" />
                 <el-option v-for="item in state.kpiList" :label="item.element" :value="item.id" />
               </el-select>
@@ -36,12 +36,12 @@
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="封顶" prop="topScore">
-              <el-input v-model="ruleForm.data[0].topScore" placeholder="请输入封顶" clearable></el-input>
+              <el-input v-model="ruleForm.topScore" placeholder="请输入封顶" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="封底" prop="bottomScore">
-              <el-input v-model="ruleForm.data[0].bottomScore" placeholder="请输入封底" clearable></el-input>
+              <el-input v-model="ruleForm.bottomScore" placeholder="请输入封底" clearable></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -134,18 +134,13 @@ const openDialog = (row: any) => {
   getElement()
   getScoreTypeList()
   state.ruleForm = {
-    type: 2,
-    data: [
-      {
-        id: row.id,
-        content: row.content,
-        score: row.score,
-        elementId: row.elementId,
-        typeId: row.typeId || 0,
-        topScore: row.topScore,
-        bottomScore: row.bottomScore
-      }
-    ]
+    id: row.id,
+    content: row.content,
+    score: row.score,
+    elementId: row.elementId,
+    typeId: row.typeId || 0,
+    topScore: row.topScore,
+    bottomScore: row.bottomScore
   }
 }
 
@@ -163,7 +158,7 @@ const onSubmit = () => {
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true
-      updateContent([state.ruleForm])
+      updateContent(state.ruleForm)
         .then(() => {
           ElMessage({
             message: '更新成功',

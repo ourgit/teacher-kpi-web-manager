@@ -147,15 +147,10 @@ const onSubmit = async () => {
   }
 
   const payload = {
-    data: [
-      {
-        id: ruleForm.id,
-        title: ruleForm.title,
-        createTime: ruleForm.createTime,
-        endTime: ruleForm.endTime
-      }
-    ],
-    type: 4
+    id: ruleForm.id,
+    title: ruleForm.title,
+    createTime: ruleForm.createTime,
+    endTime: ruleForm.endTime
   }
 
   try {
