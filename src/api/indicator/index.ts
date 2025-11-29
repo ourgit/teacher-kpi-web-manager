@@ -5,7 +5,7 @@ import request from '@/utils/request'
  */
 export function getIndicatorList(data: object) {
   return request({
-    url: '/v1/tk/getList/',
+    url: '/v1/tk/indicator/list/',
     method: 'post',
     data,
   })
@@ -27,7 +27,7 @@ export function addIndicator(data: object) {
  */
 export function updateIndicator(data: object) {
   return request({
-    url: '/v1/tk/update/',
+    url: '/v1/tk/indicator/update/',
     method: 'post',
     data,
   })

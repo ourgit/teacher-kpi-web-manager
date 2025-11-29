@@ -5,7 +5,7 @@ import request from '@/utils/request'
  */
 export function getElementList(data: object) {
   return request({
-    url: '/v1/tk/getElementList/',
+    url: '/v1/tk/element/list/',
     method: 'post',
     data,
   })
@@ -27,7 +27,7 @@ export function addElement(data: object) {
  */
 export function updateElement(data: object) {
   return request({
-    url: '/v1/tk/update/',
+    url: '/v1/tk/element/update/',
     method: 'post',
     data,
   })

@@ -5,17 +5,17 @@
         <el-row :gutter="35">
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="指标名称" prop="indicatorName">
-              <el-input v-model="ruleForm.data[0].indicatorName" placeholder="请输入指标名称" clearable></el-input>
+              <el-input v-model="ruleForm.indicatorName" placeholder="请输入指标名称" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="指标附属名称" prop="subName">
-              <el-input v-model="ruleForm.data[0].subName" placeholder="请输入指标附属名称" clearable></el-input>
+              <el-input v-model="ruleForm.subName" placeholder="请输入指标附属名称" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="KPI" prop="kpiId">
-              <el-select v-model="ruleForm.data[0].kpiId" placeholder="选择KPI" clearable>
+              <el-select v-model="ruleForm.kpiId" placeholder="选择KPI" clearable>
                 <el-option v-for="item in state.kpiList" :label="item.title" :value="item.id" />
               </el-select>
             </el-form-item>
@@ -79,13 +79,10 @@ const openDialog = (row: any) => {
   state.isShowDialog = true
   getKpiList()
   state.ruleForm = {
-    data:[{
-      id: row.id,
-      indicatorName: row.indicatorName,
-      subName: row.subName,
-      kpiId: row.kpiId
-    }],
-    type:3
+    id: row.id,
+    kpiId: row.kpiId,
+    indicatorName: row.indicatorName,
+    subName: row.subName,
   }
 }
 

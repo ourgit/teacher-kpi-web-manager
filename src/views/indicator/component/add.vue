@@ -95,7 +95,7 @@ const onSubmit = () => {
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true
-      addIndicator([state.ruleForm])
+      addIndicator(state.ruleForm)
         .then(() => {
           ElMessage({
             message: '添加成功',

@@ -33,6 +33,17 @@ export function addMember(data: object) {
   })
 }
 
+/**
+ * 更新用户
+ */
+export function updateUser(data: object) {
+  return request({
+    url: '/v1/tk/user/update/',
+    method: 'post',
+    data,
+  })
+}
+
 
 /**
  * 获取用户详情

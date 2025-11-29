@@ -5,7 +5,7 @@
         <el-form-item label="ID">
           <el-input v-model="queryData.id" size="default" placeholder="请输入ID" clearable> </el-input>
         </el-form-item>
-        <el-form-item label="内容名">
+        <el-form-item label="评价内容">
           <el-input v-model="queryData.content" size="default" placeholder="请输入评价要素" clearable> </el-input>
         </el-form-item>
         <el-form-item label="分权">
@@ -16,6 +16,12 @@
             <el-option label="全部" :value="0" />
             <el-option v-for="item in indicatorList" :key="item.id" :label="item.element" :value="item.id" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="封顶">
+          <el-input v-model="queryData.topScore" size="default" placeholder="请输入分数" clearable> </el-input>
+        </el-form-item>
+        <el-form-item label="封底">
+          <el-input v-model="queryData.bottomScore" size="default" placeholder="请输入分数" clearable> </el-input>
         </el-form-item>
         <el-form-item>
           <el-button size="default" type="primary" @click="getListData">
@@ -36,14 +42,9 @@
         <el-table-column prop="id" label="Id" style="text-align: center;"/>
         <el-table-column prop="content" label="评价内容" style="text-align: center;"/>
         <el-table-column prop="score" label="分权" style="text-align: center;"/>
-        <!-- <el-table-column label="加入时间" width="180">
-          <template #default="{ row }">
-            {{ formatDate(row.createdTime, 'YYYY-mm-dd HH:MM:SS') }}
-          </template>
-        </el-table-column> -->
         <el-table-column prop="topScore" label="封顶" style="text-align: center;"/>
         <el-table-column prop="bottomScore" label="封底" style="text-align: center;"/>
-        <el-table-column prop="kpiScoreType.description" label="得分类型" style="text-align: center;"></el-table-column>
+        <el-table-column prop="kpiScoreType.description" label="得分类型" style="text-align: center;"/>
         <el-table-column fixed="right" label="操作" style="text-align: center;">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
@@ -64,7 +65,6 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
-import { formatDate } from '@/utils/formatTime'
 import { getContentList } from '@/api/content/index'
 import { getElementList } from '@/api/element/index'
 import { storeToRefs } from 'pinia'
@@ -103,7 +103,9 @@ const state = reactive({
     id: '',
     elementId:'',
     content:'',
-    score:''
+    score:'',
+    topScore:'',
+    bottomScore:'',
   } as any,
   current:1,
   submitData: {},
@@ -119,20 +121,13 @@ const getListData = () => {
   if (JSON.stringify(state.queryData) !== JSON.stringify(state.submitData)) {
     state.currentPage = 1
   }
-  if(state.currentPage==1){
-    state.current=1
-  }else{
-    state.current=(state.currentPage-1)*10+1
-  }
-  const formData = state.queryData
+  const formData = JSON.parse(JSON.stringify(state.queryData))
   getContentList({
-    currentPage:state.current,
-    pageSize:10,
+    page: state.currentPage,
     ...formData,
   }).then((data: any) => {
     state.loading = false
     state.list = data.list
-    console.log(state.list)
     if (state.currentPage === 1 && data.pages > 0) {
       state.totalPage = data.pages
     }

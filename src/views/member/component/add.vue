@@ -24,10 +24,23 @@
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="所属部门" prop="departmentId">
+              <el-select v-model="ruleForm.departmentId" placeholder="请选择所属部门" clearable>
+                <el-option label="选择部门" :value="0" />
+                <el-option
+                  v-for="item in departmentList"
+                  :key="item.id"
+                  :label="item.departmentName"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="状态" prop="status">
               <el-select v-model="ruleForm.status" placeholder="选择状态" clearable>
                 <el-option label="正常" :value="1" />
-                <el-option label="禁用" :value="2" />
+                <el-option label="锁定" :value="2" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -54,7 +67,7 @@
 <script setup lang="ts">
 import { reactive, toRefs, ref } from 'vue'
 import { ElForm, ElMessage } from 'element-plus'
-import { addMember,getRoleList } from '@/api/member/index'
+import { addMember,getRoleList, getDepartmentList } from '@/api/member/index'
 
 
 // 定义子组件向父组件传值/事件
@@ -62,16 +75,33 @@ const emit = defineEmits(['refresh'])
 
 // 定义变量内容
 const dialogFormRef = ref(ElForm)
-const state = reactive({
-  loading: false,
-  ruleForm: {} as any,
-  rules: {
-  },
-  roleList:[] as any,
-  isShowDialog: false
+const createDefaultForm = () => ({
+  userName: '',
+  password: '',
+  phone: '',
+  typeName: '',
+  departmentId: 0,
+  status: 1,
+  roleId: 0,
 })
 
-const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
+const state = reactive({
+  loading: false,
+  ruleForm: createDefaultForm() as any,
+  rules: {
+    userName: [{ required: true, message: '请输入用户姓名', trigger: 'blur' }],
+    password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+    phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
+    departmentId: [{ required: true, message: '请选择所属部门', trigger: 'change' }],
+    status: [{ required: true, message: '请选择状态', trigger: 'change' }],
+    roleId: [{ required: true, message: '请选择角色', trigger: 'change' }],
+  },
+  roleList: [] as any,
+  departmentList: [] as any,
+  isShowDialog: false,
+})
+
+const { loading, ruleForm, rules, isShowDialog, roleList, departmentList } = toRefs(state)
 
 const getRoleLists=()=>{
   getRoleList({})
@@ -83,10 +113,20 @@ const getRoleLists=()=>{
   })
 }
 
+const loadDepartmentList = () => {
+  getDepartmentList({})
+    .then((res: any) => {
+      state.departmentList = res.list || []
+    })
+    .catch(() => {})
+}
+
 // 打开弹窗
-const openDialog = (row: any) => {
+const openDialog = () => {
   state.isShowDialog = true
+  state.ruleForm = createDefaultForm()
   getRoleLists()
+  loadDepartmentList()
 }
 
 // 关闭弹窗

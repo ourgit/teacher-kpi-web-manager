@@ -56,7 +56,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: true,
           isIframe: false,
-          roles: ['admin'],
+          roles: ['admin','common'],
           icon: 'iconfont icon-zhuye',
         },
       },
@@ -73,7 +73,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin'],
+          roles: ['admin','common'],
           icon: 'ele-Notebook',
         },
         children: [
@@ -88,7 +88,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['admin','common'],
               icon: 'ele-Notebook',
             }
           },
@@ -103,7 +103,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['admin','common'],
               icon: 'ele-Notebook',
             }
           },{
@@ -117,7 +117,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['admin','common'],
               icon: 'ele-User',
             },
           },
@@ -136,7 +136,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin'],
+          roles: ['admin','common'],
           icon: 'ele-Switch',
         },
         children: [
@@ -151,7 +151,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['admin','common'],
               icon: 'ele-Switch',
             }
           }
@@ -170,7 +170,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin'],
+          roles: ['admin','common'],
           icon: 'ele-Orange',
         },
         children: [
@@ -185,7 +185,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['admin','common'],
               icon: 'ele-Orange',
             }
           },
@@ -204,7 +204,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin'],
+          roles: ['admin','common'],
           icon: 'ele-Van',
         },
         children: [
@@ -219,7 +219,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['admin','common'],
               icon: 'ele-Van',
             }
           },
@@ -298,7 +298,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin'],
+          roles: ['admin','common'],
           icon: 'ele-Setting',
         },
         children: [
@@ -313,7 +313,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['admin','common'],
               icon: 'ele-Setting',
             },
           }

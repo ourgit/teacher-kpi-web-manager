@@ -32,7 +32,12 @@ export const useUserInfo = defineStore('userInfo', {
           phone: phone.trim(),
           password: password.trim()
         }).then((response: any) => {
-            console.log(response)
+            if(response.role.nickName == '管理员'){
+              this.userInfos.roles = ['admin']
+            }
+            else{
+              this.userInfos.roles = ['common']
+            }
             const { token, id, realName } = response
             Session.setString('token', token)
             Session.setString('uid', id)

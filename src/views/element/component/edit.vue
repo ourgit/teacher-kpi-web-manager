@@ -5,29 +5,29 @@
         <el-row :gutter="35">
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="评价要素" prop="element">
-              <el-input v-model="ruleForm.data[0].element" placeholder="请输入评价要素" clearable></el-input>
+              <el-input v-model="ruleForm.element" placeholder="请输入评价要素" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="评价标准" prop="criteria">
-              <el-input v-model="ruleForm.data[0].criteria" placeholder="请输入评价标准" clearable></el-input>
+              <el-input v-model="ruleForm.criteria" placeholder="请输入评价标准" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="模式" prop="type">
-              <el-select v-model="ruleForm.data[0].type" placeholder="选择模式" clearable>
+              <el-select v-model="ruleForm.type" placeholder="选择模式" clearable>
                 <el-option v-for="item in modeOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="分值" prop="score">
-              <el-input v-model="ruleForm.data[0].score" placeholder="请输入分值" clearable></el-input>
+              <el-input v-model="ruleForm.score" placeholder="请输入分值" clearable></el-input>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="指标" prop="indicatorId">
-              <el-select v-model="ruleForm.data[0].indicatorId" placeholder="选择指标" clearable>
+              <el-select v-model="ruleForm.indicatorId" placeholder="选择指标" clearable>
                 <el-option label="选择指标" :value="0" />
                 <el-option v-for="item in state.indicatorList" :label="item.indicatorName" :value="item.id" />
               </el-select>
@@ -74,7 +74,7 @@ const state = reactive({
   loading: false,
   ruleForm: {} as any,
   rules: {
-    kpiId:[{ required: true, validator: validateKpiId}]
+    indicatorId:[{ required: true, validator: validateKpiId}]
   },
   indicatorList:[] as any,
   isShowDialog: false
@@ -97,15 +97,12 @@ const openDialog = (row: any) => {
   state.isShowDialog = true
   getIndicator()
   state.ruleForm = {
-    type:1,
-    data:[{
       id: row.id,
       element: row.element,
       criteria: row.criteria,
       type: Number(row.type),
       score: row.score,
       indicatorId: row.indicatorId
-    }]
   }
 }
 
@@ -123,7 +120,7 @@ const onSubmit = () => {
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true
-      updateElement([state.ruleForm])
+      updateElement(state.ruleForm)
         .then(() => {
           ElMessage({
             message: '更新成功',

@@ -2,9 +2,6 @@
   <div class="page-container layout-padding">
     <el-card shadow="hover" class="layout-padding-auto">
       <el-form class="query" :inline="true">
-        <el-form-item label="ID">
-          <el-input v-model="queryData.id" size="default" placeholder="请输入ID" clearable/>
-        </el-form-item>
         <el-form-item label="手机号码">
           <el-input v-model="queryData.phone" size="default" placeholder="请输入手机号" clearable/>
         </el-form-item>
@@ -63,11 +60,12 @@
         <el-table-column fixed="right" label="状态" show-overflow-tooltip width="100">
           <template #default="{ row }">
             <el-tag type="success" v-if="row.status === 1">正常</el-tag>
-            <el-tag v-if="row.status === 2">禁用</el-tag>
+            <el-tag v-if="row.status === 2">锁定</el-tag>
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template #default="{ row }">
+            <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
             <el-button size="small" text type="primary" @click="onDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -99,6 +97,12 @@ const addDialog = defineAsyncComponent(
 const deleteDialog = defineAsyncComponent(
   () => import('./component/delete.vue')
 )
+
+const editDialog = defineAsyncComponent(
+  () => import('./component/edit.vue')
+)
+
+
 // 定义变量
 const editDialogRef = ref()
 const updateBalanceDialogRef = ref()
@@ -110,11 +114,12 @@ const state = reactive({
   currentPage: 1,
   totalPage: 1,
   queryData: {
-    filter: '',
-    uid: '',
-    orgId: '',
-    shopId: '',
-    status: ''
+    phone: '',
+    userName: '',
+    typeName: '',
+    roleId: 0,
+    departmentId: 0,
+    status: 0
   } as any,
   submitData: {},
   roleList: [] as any,
@@ -176,6 +181,12 @@ const onOpenAdd=()=>{
 const onDelete = (row:any)=>{
     deleteDialogRef.value.openDialog(row)
 }
+
+const onOpenEdit = (row: any) => {
+  console.log(row)
+  editDialogRef.value.openDialog(row)
+}
+
 
 const handleSizeChange = () => {
   getListData()

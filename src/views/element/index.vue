@@ -18,9 +18,6 @@
             <el-option label="机器评分" :value="1" />
            </el-select>
         </el-form-item>
-        <el-form-item label="分数">
-          <el-input v-model="queryData.score" size="default" placeholder="请输入分数" clearable> </el-input>
-        </el-form-item>
         <el-form-item label="指标">
           <el-select v-model="queryData.indicatorId" size="default" placeholder="" clearable>
             <el-option label="全部" :value="0" />
@@ -52,11 +49,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="score" label="分值" style="text-align: center;"/>
-        <!-- <el-table-column label="加入时间" width="180">
-          <template #default="{ row }">
-            {{ formatDate(row.createdTime, 'YYYY-mm-dd HH:MM:SS') }}
-          </template>
-        </el-table-column> -->
         <el-table-column fixed="right" label="操作" style="text-align: center;">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
@@ -118,7 +110,6 @@ const state = reactive({
     element:'',
     criteria:'',
     type:'',
-    score:''
   } as any,
   current:1,
   submitData: {},
@@ -139,15 +130,9 @@ const getListData = () => {
   if (JSON.stringify(state.queryData) !== JSON.stringify(state.submitData)) {
     state.currentPage = 1
   }
-  if(state.currentPage==1){
-    state.current=1
-  }else{
-    state.current=(state.currentPage-1)*10+1
-  }
-  const formData = state.queryData
+  const formData = JSON.parse(JSON.stringify(state.queryData))
   getElementList({
-    currentPage:state.current,
-    pageSize:10,
+    page: state.currentPage,
     ...formData,
   }).then((data: any) => {
     state.loading = false
