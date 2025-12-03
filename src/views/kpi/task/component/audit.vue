@@ -150,7 +150,6 @@ const getElementListByIndicatorId=(row: any,status: any) => {
         state.ruleForm.data.push(item)
       })
     })
-    console.log(state.ruleForm.data);
   }).catch((e:any)=>{
     console.error("出错",e);
   })
@@ -176,8 +175,8 @@ const onCancel = () => {
 }
 
 const onSubmit = () => {
-  dialogFormRef.value.validate((valid: boolean) => {
-    if (valid) {
+  // dialogFormRef.value.validate((valid: boolean) => {
+  //   if (valid) {
       state.loading = true
       addLeaderScore(state.ruleForm)
         .then(() => {
@@ -192,10 +191,10 @@ const onSubmit = () => {
         .catch(() => {
           state.loading = false
         })
-    } else {
-      return false
-    }
-  })
+    // } else {
+    //   return false
+    // }
+  // })
 }
 
 defineExpose({
