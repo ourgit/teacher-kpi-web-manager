@@ -92,6 +92,7 @@ const state = reactive({
   rules: {},
   elementList: [] as any,
   isShowDialog: false,
+  status:0,
 })
 
 const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
@@ -140,7 +141,6 @@ const getElementListByIndicatorId=(row: any,status: any) => {
     status:status
   }).then((data:any)=>{
     state.elementList=data.list;
-    console.log(state.elementList)
     state.elementList.forEach((element:any)=>{
       element.contentList.forEach((content:any)=>{
         const item={
@@ -162,6 +162,7 @@ const openDialog = (row: any,status: any) => {
     userId:row.userId,
     data:[]
   }
+  state.status=status;
   getElementListByIndicatorId(row,status)
   
 }
@@ -175,9 +176,8 @@ const onCancel = () => {
 }
 
 const onSubmit = () => {
-  // dialogFormRef.value.validate((valid: boolean) => {
-  //   if (valid) {
-      state.loading = true
+  if(state.status!=3){
+    state.loading = true
       addLeaderScore(state.ruleForm)
         .then(() => {
           ElMessage({
@@ -190,11 +190,14 @@ const onSubmit = () => {
         })
         .catch(() => {
           state.loading = false
-        })
-    // } else {
-    //   return false
-    // }
-  // })
+      })
+  }else{
+    ElMessage({
+            message: '已审批',
+            type: 'success',
+          })
+          emit('refresh')
+  }
 }
 
 defineExpose({
