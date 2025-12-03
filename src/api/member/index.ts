@@ -334,3 +334,12 @@ export function deleteCampus(data: object) {
     data,
   })
 }
+
+
+export function getElementListById(data: object) {
+  return request({
+    url: '/v1/tk/element/list/by/indicator/id/',
+    method: 'post',
+    data,
+  })
+}

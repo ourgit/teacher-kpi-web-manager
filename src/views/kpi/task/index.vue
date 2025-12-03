@@ -32,15 +32,15 @@
         <el-table-column prop="status" label="状态" show-overflow-tooltip width="130"/>
         <el-table-column label="该用户评分分数" show-overflow-tooltip>
           <template #default="{ row }">
-              {{ isPass(row.teacherElementScore?.score) }}
+              {{ isPass(row.teacherIndicatorScore?.score) }}
           </template>
         </el-table-column>
         <el-table-column label="最终分数" show-overflow-tooltip>
           <template #default="{ row }">
-              {{ isPass(row.teacherElementScore?.finalScore) }}
+              {{ isPass(row.teacherIndicatorScore?.finalScore) }}
           </template>
         </el-table-column>
-        <el-table-column prop="element.element" label="评分要素名称" show-overflow-tooltip/>
+        <el-table-column prop="indicator.indicatorName" label="评分指标名称" show-overflow-tooltip/>
         <el-table-column prop="userName" label="上报用户" show-overflow-tooltip/>
         <el-table-column prop="parentName" label="评分用户" show-overflow-tooltip>
           <template #default="{ row }">
@@ -60,7 +60,7 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template #default="{ row }">
-            <el-button size="small" text type="primary" @click="onAudit(row)">审核</el-button>
+            <el-button size="small" text type="primary" @click="onAudit(row,row.status)">审核</el-button>
             <el-button v-if="row.status === '已完成'" size="small" text type="success" @click="onSettle(row)">结算</el-button>
           </template>
         </el-table-column>
@@ -164,8 +164,15 @@ const formatParentNames = (names: string | undefined) => {
 }
 
 
-const onAudit = (row:any)=>{
-  auditDialogRef.value.openDialog(row)
+const onAudit = (row:any,status:any)=>{
+  if(status=="待确认"){
+    status=1
+  }else if(status=="待完成"){
+    status=2
+  }else{
+    status=3
+  }
+  auditDialogRef.value.openDialog(row,status)
 }
 
 const onSettle = (row:any)=>{
