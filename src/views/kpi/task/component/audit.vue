@@ -16,13 +16,42 @@
             <el-table :data="row.contentList" v-loading="loading" style="width: 100%">
               <el-table-column prop="content" label="内容名称" show-overflow-tooltip/>
               <el-table-column prop="contentType" label="内容类型" show-overflow-tooltip/>
-              <el-table-column prop="maxScore" label="最高分数" show-overflow-tooltip/>
-              <el-table-column prop="teacherContentScore" label="该教师的期望分数" show-overflow-tooltip />
+              <el-table-column prop="maxScore" label="最高分数" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span :class="getQualificationClass(row.maxScore)">
+                    {{ getQualificationText(row.maxScore) }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="teacherContentScore" label="该教师的期望分数" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span :class="getQualificationClass(row.teacherContentScore)">
+                    {{ getQualificationText(row.teacherContentScore) }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="teacherContentScore" label="该教师的期望分数" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span :class="getQualificationClass(row.teacherContentScore)">
+                    {{ getQualificationText(row.teacherContentScore) }}
+                  </span>
+                </template>
+              </el-table-column>
               <el-table-column prop="finalScore" label="最终分数" width="150">
                 <template #default="{ row }">
-                  <el-input-number
+                  <el-select
+                    v-if="Number(row.maxScore) === 5000"
                     v-model="row.finalScore"
-                    :min="0"
+                    placeholder="请选择"
+                    size="small"
+                    style="width: 100%"
+                  >
+                    <el-option label="合格 (5000)" :value="5000" />
+                    <el-option label="不合格 (-5000)" :value="-5000" />
+                  </el-select>
+                  <el-input-number
+                    v-else
+                    v-model="row.finalScore"
                     :precision="2"
                     :step="0.1"
                     size="small"
@@ -131,6 +160,23 @@ const getPreviewSrcList = (paths: string | undefined) => {
   return splitFilePaths(paths)
     .filter((item) => isImage(item))
     .map((item) => getFileUrl(item))
+}
+
+// 期望分数对应状态
+const getQualificationText = (score: number | string | undefined) => {
+  const numericScore = Number(score)
+  if (Number.isNaN(numericScore)) return ''
+  if (numericScore >= 5000) return '合格'
+  if (numericScore <= -5000) return '不合格'
+  return numericScore
+}
+
+const getQualificationClass = (score: number | string | undefined) => {
+  const numericScore = Number(score)
+  if (Number.isNaN(numericScore)) return ''
+  if (numericScore >= 5000) return 'qualified-text'
+  if (numericScore <= -5000) return 'unqualified-text'
+  return ''
 }
 
 const getElementListByIndicatorId=(row: any,status: any) => {
