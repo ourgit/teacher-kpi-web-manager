@@ -96,7 +96,7 @@ export function getTeacherListDispatch(data: object) {
  */
 export function withDraw(data: object) {
   return request({
-    url: '/v1/tk/withDraw/other/',
+    url: '/v1/tk/withDraw/',
     method: 'post',
     data,
   })

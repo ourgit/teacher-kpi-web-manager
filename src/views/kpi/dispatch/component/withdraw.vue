@@ -47,7 +47,7 @@ const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
 
 const getKPIList=()=>{
   getKPIListUserId({
-    userId:state.ruleForm.teacherId
+    userId:state.ruleForm.userId
   })
   .then((data:any)=>{
     state.kpiList=data.list;
@@ -64,7 +64,7 @@ const handleSelectionChange = (selectedRows: []) => {
 const openDialog = (row: any) => {
   state.isShowDialog = true
   state.ruleForm = {
-    teacherId:row.id
+    userId:row.id
   }
   getKPIList();
 }
@@ -89,7 +89,7 @@ const onSubmit = () => {
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true
-      withDraw([state.ruleForm])
+      withDraw(state.ruleForm)
         .then(() => {
           ElMessage({
             message: '撤销成功',
