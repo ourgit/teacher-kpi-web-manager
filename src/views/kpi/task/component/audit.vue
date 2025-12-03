@@ -11,15 +11,51 @@
         <el-table-column prop="elementName" label="要素名称" width="120" />
         <el-table-column prop="maxScore" label="最高分数" show-overflow-tooltip width="130"/>
         <el-table-column prop="teacherElementScore" label="该教师的分数" show-overflow-tooltip/>
-        <el-table-column prop="elementType" label="要素类型" show-overflow-tooltip/>
         <el-table-column label="内容列表" min-width="200">
           <template #default="{ row }">
             <el-table :data="row.contentList" v-loading="loading" style="width: 100%">
               <el-table-column prop="content" label="内容名称" show-overflow-tooltip/>
               <el-table-column prop="contentType" label="内容类型" show-overflow-tooltip/>
-              <el-table-column prop="finalScore" label="该教师的分数" show-overflow-tooltip />
+              <el-table-column prop="maxScore" label="最高分数" show-overflow-tooltip/>
+              <el-table-column prop="teacherContentScore" label="该教师的期望分数" show-overflow-tooltip />
+              <el-table-column prop="finalScore" label="最终分数" width="150">
+                <template #default="{ row }">
+                  <el-input-number
+                    v-model="row.finalScore"
+                    :min="0"
+                    :precision="2"
+                    :step="0.1"
+                    size="small"
+                    style="width: 100%"
+                    controls-position="right"
+                  />
+                </template>
+              </el-table-column>
               <el-table-column prop="description" label="描述" show-overflow-tooltip/>
-              <el-table-column prop="path" label="附件路径" show-overflow-tooltip/>
+              <el-table-column prop="path" label="附件" min-width="200">
+                <template #default="{ row }">
+                  <div v-if="row.path" style="display: flex; flex-direction: column; gap: 8px;">
+                    <template v-for="(filePath, index) in splitFilePaths(row.path)" :key="index">
+                      <div v-if="isImage(filePath)" style="position: relative;">
+                        <el-image
+                          :src="getFileUrl(filePath)"
+                          :preview-src-list="getPreviewSrcList(row.path)"
+                          fit="cover"
+                          style="width: 80px; height: 80px; border-radius: 4px; cursor: pointer;"
+                          :preview-teleported="true"
+                        />
+                      </div>
+                      <div v-else style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: #f5f7fa; border-radius: 4px;">
+                        <el-icon :size="16" color="#909399">
+                          <Document />
+                        </el-icon>
+                        <span style="font-size: 12px; color: #606266;">{{ getFilenameFromPath(filePath) }}</span>
+                      </div>
+                    </template>
+                  </div>
+                  <span v-else style="color: #909399; font-size: 12px;">暂无附件</span>
+                </template>
+              </el-table-column>
             </el-table>
           </template>
         </el-table-column>
@@ -42,10 +78,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref, computed } from 'vue'
+import { reactive, toRefs, ref } from 'vue'
 import { ElForm, ElMessage } from 'element-plus'
-import { addLeaderScore, getElementListById, getTeacherTaskFile } from '@/api/member/index'
-import { Picture, Document } from '@element-plus/icons-vue'
+import { addLeaderScore, getElementListById } from '@/api/member/index'
+import { Document } from '@element-plus/icons-vue'
 
 const emit = defineEmits(['refresh'])
 
@@ -54,95 +90,13 @@ const state = reactive({
   loading: false,
   ruleForm: {} as any,
   rules: {},
-  srcList: [] as any,
   elementList: [] as any,
-  filteredFileList: [] as any,
   isShowDialog: false,
 })
 
 const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
 
-const groupedFileList = computed(() => {
-  const groupMap = new Map<string, any[]>()
-  state.filteredFileList.forEach((file: any) => {
-    const key = file.content || '未分类'
-    if (!groupMap.has(key)) {
-      groupMap.set(key, [])
-    }
-    groupMap.get(key)!.push(file)
-  })
-  return Array.from(groupMap.entries()).map(([key, list]) => ({
-    key,
-    list,
-  }))
-})
-
-const showQualificationSelect = ()=>{
-  if(state.ruleForm.data.score>=5000||state.ruleForm.data.score<=-5000){
-    return false;
-  }else{
-    return true;
-  }
-}
-
-const toRelativePath = (path: any) => {
-  if (!path || typeof path !== 'string') return ''
-  return path.startsWith('/') ? path : `/${path}`
-}
-
-const downloadFile = (row: any) => {
-  try {
-    const relativePath = toRelativePath(row.path)
-    if (!relativePath) throw new Error('无效的文件路径')
-    const link = document.createElement('a')
-    link.href = relativePath
-    link.download = getFilenameFromUrl(relativePath)
-    link.style.display = 'none'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    return true
-  } catch (error) {
-    console.error('下载失败:', error)
-    ElMessage.error('文件下载失败')
-    return false
-  }
-}
-
-
-const getFilenameFromUrl = (url: any) => {
-  try {
-    const urlObj = new URL(url)
-    const pathname = urlObj.pathname
-    return pathname.split('/').pop() || 'download'
-  } catch {
-    const segments = url.split('/')
-    return segments[segments.length - 1] || 'download'
-  }
-}
-
-const getFileIconColor = (path: any) => {
-  if (isImage(path)) return '#409EFF'
-  return '#909399'
-}
-
-const getFileIcon = (path: any) => {
-  if (isImage(path)) return Picture
-  return Document
-}
-
-const isImage = (path: any) => {
-  if (!path || typeof path !== 'string') return false
-  const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']
-  return imageExtensions.some((ext) => path.toLowerCase().endsWith(ext))
-}
-
-const getFileUrl = (path: any) => {
-  if (!path || typeof path !== 'string') return ''
-  const normalizedPath = path.replace(/^\/+/, '')
-  return `http://120.48.81.209/${normalizedPath}`
-}
-
+// 分割文件路径（支持逗号、中文逗号、换行符分隔）
 const splitFilePaths = (path: string | undefined) => {
   if (!path) return []
   return path
@@ -151,40 +105,32 @@ const splitFilePaths = (path: string | undefined) => {
     .filter(Boolean)
 }
 
-const normalizeFileList = (list: any[] = []) => {
-  const normalized: any[] = []
-  list.forEach((item) => {
-    const paths = splitFilePaths(item.path)
-    if (paths.length === 0) {
-      normalized.push(item)
-      return
-    }
-    paths.forEach((path, idx) => {
-      normalized.push({
-        ...item,
-        path,
-        _pathIndex: idx,
-      })
-    })
-  })
-  return normalized
+// 判断是否为图片
+const isImage = (path: string) => {
+  if (!path || typeof path !== 'string') return false
+  const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg']
+  return imageExtensions.some((ext) => path.toLowerCase().endsWith(ext))
 }
 
-const getTaskFile = (row: any) => {
-  getTeacherTaskFile({
-    taskId: row.id,
-    userId: row.userId,
-  })
-    .then((data: any) => {
-      const list = Array.isArray(data.list) ? data.list : []
-      state.filteredFileList = normalizeFileList(list)
-      state.srcList = state.filteredFileList
-        .filter((file: any) => !!file.path)
-        .map((file: any) => getFileUrl(file.path))
-    })
-    .catch((e:any) => {
-      console.error('出错',e);
-    })
+// 获取文件完整URL
+const getFileUrl = (path: string) => {
+  if (!path || typeof path !== 'string') return ''
+  const normalizedPath = path.replace(/^\/+/, '')
+  return `http://120.48.81.209/${normalizedPath}`
+}
+
+// 从路径中提取文件名
+const getFilenameFromPath = (path: string) => {
+  if (!path) return ''
+  const segments = path.split('/')
+  return segments[segments.length - 1] || path
+}
+
+// 构建图片预览列表（保持同一组预览）
+const getPreviewSrcList = (paths: string | undefined) => {
+  return splitFilePaths(paths)
+    .filter((item) => isImage(item))
+    .map((item) => getFileUrl(item))
 }
 
 const getElementListByIndicatorId=(row: any,status: any) => {
@@ -194,6 +140,7 @@ const getElementListByIndicatorId=(row: any,status: any) => {
     status:status
   }).then((data:any)=>{
     state.elementList=data.list;
+    console.log(state.elementList)
     state.elementList.forEach((element:any)=>{
       element.contentList.forEach((content:any)=>{
         const item={
@@ -267,29 +214,4 @@ defineExpose({
   font-weight: 500;
 }
 
-.file-groups {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.file-group {
-  padding: 14px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  background-color: #fdfdff;
-}
-
-.file-group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.group-count {
-  color: #909399;
-  font-size: 13px;
-}
 </style>
