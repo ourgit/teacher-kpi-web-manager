@@ -51,6 +51,14 @@
               <el-input v-model="ruleForm.bottomScore" placeholder="请输入封底" clearable></el-input>
             </el-form-item>
           </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="文件上传" prop="type">
+              <el-radio-group v-model="ruleForm.type">
+                <el-radio :label="0">无需文件</el-radio>
+                <el-radio :label="1">需要文件</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       <template #footer>
@@ -93,14 +101,24 @@ const createDefaultForm = () => ({
   typeId: 0,
   topScore: '',
   bottomScore: '',
+  type: 0,
 })
+
+const validateUploadFlag = (rule: any, value: number, callback: any) => {
+  if (value !== 0 && value !== 1) {
+    callback(new Error('请选择是否需要文件'))
+  } else {
+    callback()
+  }
+}
 
 const state = reactive({
   loading: false,
   ruleForm: createDefaultForm(),
   rules: {
     typeId: [{ required: true, validator: validateSelectRequired('请选择得分类型') }],
-    elementId:[{ required: true, validator: validateSelectRequired('请选择要素')}]
+    elementId:[{ required: true, validator: validateSelectRequired('请选择要素')}],
+    type:[{ required: true, validator: validateUploadFlag }]
   },
   kpiList:[] as any,
   scoreTypeList: [] as any,
