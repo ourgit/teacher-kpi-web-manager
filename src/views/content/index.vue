@@ -128,6 +128,7 @@ const getListData = () => {
   }).then((data: any) => {
     state.loading = false
     state.list = data.list
+    console.log(state.list)
     if (state.currentPage === 1 && data.pages > 0) {
       state.totalPage = data.pages
     }

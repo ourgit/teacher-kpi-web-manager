@@ -121,6 +121,7 @@ const state = reactive({
   rules: {},
   elementList: [] as any,
   isShowDialog: false,
+  status:0,
 })
 
 const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
@@ -189,6 +190,10 @@ const getElementListByIndicatorId=(row: any,status: any) => {
     console.log(state.elementList)
     state.elementList.forEach((element:any)=>{
       element.contentList.forEach((content:any)=>{
+        // 如果最终分数为null，默认为0.0
+        if (content.finalScore === null || content.finalScore === undefined) {
+          content.finalScore = Number(0.0)
+        }
         const item={
           contentId:content.contentId,
           score:content.finalScore
@@ -210,7 +215,7 @@ const openDialog = (row: any,status: any) => {
     data:[]
   }
   getElementListByIndicatorId(row,status)
-  
+  state.status=status;
 }
 
 const closeDialog = () => {
@@ -222,9 +227,19 @@ const onCancel = () => {
 }
 
 const onSubmit = () => {
-  dialogFormRef.value.validate((valid: boolean) => {
-    if (valid) {
-      state.loading = true
+  if(state.status!=3){
+    // 重新收集最新的最终分数，以字符串格式的浮点数传递
+    state.ruleForm.data = []
+    state.elementList.forEach((element:any)=>{
+      element.contentList.forEach((content:any)=>{
+        const item={
+          contentId:content.contentId,
+          score:parseFloat(content.finalScore || 0).toFixed(2)
+        }
+        state.ruleForm.data.push(item)
+      })
+    })
+    state.loading = true
       addLeaderScore(state.ruleForm)
         .then(() => {
           ElMessage({
@@ -238,10 +253,13 @@ const onSubmit = () => {
         .catch(() => {
           state.loading = false
         })
-    } else {
-      return false
-    }
-  })
+  }else{
+    ElMessage({
+            message: '已提交',
+            type: 'success',
+          })
+  }
+      
 }
 
 defineExpose({
