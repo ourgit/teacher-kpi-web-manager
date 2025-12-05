@@ -10,6 +10,18 @@ export function getKPIList(data?: object) {
     data,
   })
 }
+
+/**
+ * 获取KPI列表（不分页）
+ */
+export function getKPIListAll(data?: object) {
+  return request({
+    url: '/v1/tk/kpi/list/noPage/',
+    method: 'post',
+    data,
+  })
+}
+
 export function getKPIListGet(data: object) {
   return request({
     url: '/v1/tk/getKpiList/',
@@ -97,6 +109,17 @@ export function getTeacherListDispatch(data: object) {
 export function withDraw(data: object) {
   return request({
     url: '/v1/tk/withDraw/',
+    method: 'post',
+    data,
+  })
+}
+
+/**
+ * kpi下信息的连锁查询
+ */
+export function getKpiWithOtherList(data: object) {
+  return request({
+    url: '/v1/tk/kpi/list/all/',
     method: 'post',
     data,
   })
