@@ -3,7 +3,7 @@
     <el-dialog
       title="审批分数"
       v-model="isShowDialog"
-      width="1200px"
+      width="1600px"
       :close-on-click-modal="false"
       :destroy-on-close="true"
     >
@@ -15,18 +15,10 @@
           <template #default="{ row }">
             <el-table :data="row.contentList" v-loading="loading" style="width: 100%">
               <el-table-column prop="content" label="内容名称" show-overflow-tooltip/>
-              <el-table-column prop="contentType" label="内容类型" show-overflow-tooltip/>
               <el-table-column prop="maxScore" label="最高分数" show-overflow-tooltip>
                 <template #default="{ row }">
                   <span :class="getQualificationClass(row.maxScore)">
                     {{ getQualificationText(row.maxScore) }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="teacherContentScore" label="该教师的期望分数" show-overflow-tooltip>
-                <template #default="{ row }">
-                  <span :class="getQualificationClass(row.teacherContentScore)">
-                    {{ getQualificationText(row.teacherContentScore) }}
                   </span>
                 </template>
               </el-table-column>
@@ -85,6 +77,16 @@
                   <span v-else style="color: #909399; font-size: 12px;">暂无附件</span>
                 </template>
               </el-table-column>
+              <el-table-column prop="isNeedFile" label="是否需要文件">
+                <template #default="{ row }">
+                  <el-tag v-if="row.isNeedFile==true" type="danger" effect="dark">
+                    需要文件
+                  </el-tag>
+                  <el-tag v-else type="primary" effect="dark">
+                    不需要文件
+                  </el-tag>
+                </template>
+              </el-table-column>
             </el-table>
           </template>
         </el-table-column>
@@ -111,6 +113,7 @@ import { reactive, toRefs, ref } from 'vue'
 import { ElForm, ElMessage } from 'element-plus'
 import { addLeaderScore, getElementListById } from '@/api/member/index'
 import { Document } from '@element-plus/icons-vue'
+import { fileIPLocate } from '@/utils/getIP'
 
 const emit = defineEmits(['refresh'])
 
@@ -146,7 +149,7 @@ const isImage = (path: string) => {
 const getFileUrl = (path: string) => {
   if (!path || typeof path !== 'string') return ''
   const normalizedPath = path.replace(/^\/+/, '')
-  return `http://120.48.81.209/${normalizedPath}`
+  return `${fileIPLocate}/${normalizedPath}`
 }
 
 // 从路径中提取文件名

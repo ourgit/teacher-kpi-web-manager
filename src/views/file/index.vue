@@ -206,6 +206,7 @@
 import { ref, computed, onMounted,reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getFileList,addFile,deleteFile} from '@/api/file/index'
+import { fileIPLocate } from '@/utils/getIP'
 
 import { 
     Search, 
@@ -213,12 +214,9 @@ import {
     Document, 
     Download, 
     Delete, 
-    VideoPlay,
     UploadFilled,
     ArrowLeft
 } from '@element-plus/icons-vue'
-
-const locate = ref("http://120.48.81.209")
 
 // 响应式数据
 const upload = ref()
@@ -402,7 +400,7 @@ const handleDownload = (item) => {
     //ElMessage.success(`开始下载: ${item.fileName}`)
     // 实际下载逻辑
     const link = document.createElement('a')
-    const url=locate.value+searchPath.value+item.fileName
+    const url=fileIPLocate+searchPath.value+item.fileName
     link.href = url
     link.download = item.fileName
     link.target = '_blank' // 新窗口打开

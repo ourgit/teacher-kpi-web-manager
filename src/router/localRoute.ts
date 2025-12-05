@@ -363,7 +363,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isAffix: false,
           isIframe: false,
           roles: ['admin','common'],
-          icon: 'ele-Orange',
+          icon: 'ele-Document',
         },
         children: [
           {
@@ -378,7 +378,41 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isAffix: false,
               isIframe: false,
               roles: ['admin','common'],
-              icon: 'ele-Orange',
+              icon: 'ele-Document',
+            }
+          },
+        ],
+      },
+      //test
+      {
+        path: '/test',
+        name: 'test',
+        component: () => import('@/layout/routerView/parent.vue'),
+        redirect: '/test/index',
+        meta: {
+          title: '测试',
+          isLink: '',
+          isHide: false,
+          isKeepAlive: true,
+          isAffix: false,
+          isIframe: false,
+          roles: ['admin','common'],
+          icon: 'ele-Pear',
+        },
+        children: [
+          {
+            path: '/test/index',
+            name: 'testIndex',
+            component: () => import('@/views/test/index.vue'),
+            meta: {
+              title: '测试用',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['admin','common'],
+              icon: 'ele-Pear',
             }
           },
         ],
