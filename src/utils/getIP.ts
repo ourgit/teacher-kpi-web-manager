@@ -1,0 +1,1 @@
+export const fileIPLocate="http://120.48.81.209"
