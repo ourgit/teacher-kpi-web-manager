@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { reactive, onMounted, ref, toRefs } from 'vue'
-import { getKPIList } from '@/api/kpi/index'
+import { getKPIListAll } from '@/api/kpi/index'
 import { useRouter } from 'vue-router'
 const router = useRouter() // 创建 router 实例
 
@@ -87,8 +87,8 @@ const getListData = () => {
     state.currentPage = 1
   }
   const formData = JSON.parse(JSON.stringify(state.queryData))
-  getKPIList({
-    page: state.currentPage,
+  getKPIListAll({
+    //page: state.currentPage,
     ...formData,
   }).then((data: any) => {
     state.loading = false
