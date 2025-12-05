@@ -318,7 +318,41 @@ export const localRoutes: Array<RouteRecordRaw> = [
             },
           }
         ],
-      }
+      },
+      //file
+      {
+        path: '/file',
+        name: 'file',
+        component: () => import('@/layout/routerView/parent.vue'),
+        redirect: '/file/index',
+        meta: {
+          title: '文件',
+          isLink: '',
+          isHide: false,
+          isKeepAlive: true,
+          isAffix: false,
+          isIframe: false,
+          roles: ['admin','common'],
+          icon: 'ele-Orange',
+        },
+        children: [
+          {
+            path: '/file/index',
+            name: 'fileIndex',
+            component: () => import('@/views/file/index.vue'),
+            meta: {
+              title: '文件管理',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['admin','common'],
+              icon: 'ele-Orange',
+            }
+          },
+        ],
+      },
       //待删除
       // {
       //   path: '/system',
