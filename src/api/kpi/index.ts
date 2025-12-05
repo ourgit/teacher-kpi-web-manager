@@ -10,6 +10,18 @@ export function getKPIList(data?: object) {
     data,
   })
 }
+
+/**
+ * 获取KPI列表（不分页）
+ */
+export function getKPIListAll(data?: object) {
+  return request({
+    url: '/v1/tk/kpi/list/noPage/',
+    method: 'post',
+    data,
+  })
+}
+
 export function getKPIListGet(data: object) {
   return request({
     url: '/v1/tk/getKpiList/',

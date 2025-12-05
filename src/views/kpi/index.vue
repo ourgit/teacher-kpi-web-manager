@@ -107,6 +107,7 @@ const getListData = () => {
   const formData = JSON.parse(JSON.stringify(state.queryData))
   getKPIList({
     page: state.currentPage,
+    size:10,
     ...formData,
   }).then((data: any) => {
     state.loading = false
