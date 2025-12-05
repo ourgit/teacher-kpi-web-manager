@@ -23,6 +23,13 @@
         <el-form-item label="封底">
           <el-input v-model="queryData.bottomScore" size="default" placeholder="请输入分数" clearable> </el-input>
         </el-form-item>
+<!--         <el-form-item label="文件上传">
+          <el-select v-model="queryData.type" size="default" placeholder="请选择是否需要文件" clearable>
+            <el-option label="全部" :value="''" />
+            <el-option label="无需文件" :value="0" />
+            <el-option label="需要文件" :value="1" />
+          </el-select>
+        </el-form-item> -->
         <el-form-item>
           <el-button size="default" type="primary" @click="getListData">
             <el-icon>
@@ -45,6 +52,11 @@
         <el-table-column prop="topScore" label="封顶" style="text-align: center;"/>
         <el-table-column prop="bottomScore" label="封底" style="text-align: center;"/>
         <el-table-column prop="kpiScoreType.description" label="得分类型" style="text-align: center;"/>
+        <el-table-column label="文件上传" style="text-align: center;">
+          <template #default="{ row }">
+            {{ formatUploadType(row.type) }}
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" style="text-align: center;">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
@@ -106,6 +118,7 @@ const state = reactive({
     score:'',
     topScore:'',
     bottomScore:'',
+    type: '',
   } as any,
   current:1,
   submitData: {},
@@ -114,6 +127,15 @@ const state = reactive({
 })
 
 const { list, loading, currentPage, totalPage, queryData, indicatorList, totalBalance } = toRefs(state)
+
+const formatUploadType = (value: number | string) => {
+  if (value === '' || value === undefined || value === null) {
+    return '未设置'
+  }
+  if (Number(value) === 1) return '需要文件'
+  if (Number(value) === 0) return '无需文件'
+  return '未设置'
+}
 
 // 获取列表
 const getListData = () => {
