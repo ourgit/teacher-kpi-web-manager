@@ -35,6 +35,8 @@ export default defineConfig({
       '/v1/': {
         target:'http://127.0.0.1:9000',
         // target: 'https://r.xcx100.info',
+        //target:'http://120.48.81.209',
+        
         changeOrigin: true,
       }
     },
