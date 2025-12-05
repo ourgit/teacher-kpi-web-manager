@@ -123,6 +123,36 @@ export const localRoutes: Array<RouteRecordRaw> = [
           },
         ],
       },
+      {
+        path:'/performance/index',
+        name: 'performanceIndex',
+        component: () => import('@/views/performance/index.vue'),
+        meta: {
+          title: '绩效配置',
+          isLink: '',
+          isHide: false,
+          isKeepAlive: true,
+          isAffix: false,
+          isIframe: false,
+          roles: ['admin','common'],
+          icon: 'ele-Grid',
+        }
+      },
+      {
+        path:'/performance/configure',
+        name: 'performanceConfigure',
+        component: () => import('@/views/performance/component/configure.vue'),
+        meta: {
+          title: '绩效配置详情',
+          isLink: '',
+          isHide: true,
+          isKeepAlive: false,
+          isAffix: false,
+          isIframe: false,
+          roles: ['admin','common'],
+          icon: 'ele-Setting',
+        }
+      },
        //indicator
       {
         path: '/indicator',
