@@ -66,8 +66,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted, onUnmounted, ref, toRefs } from 'vue'
-import { getKPIList } from '@/api/kpi/index'
+import { reactive, onMounted, ref, toRefs, onUnmounted } from 'vue'
+import { getKPIListAll } from '@/api/kpi/index'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
@@ -110,9 +110,8 @@ const getListData = (isLoadMore = false) => {
   }
   
   const formData = JSON.parse(JSON.stringify(state.queryData))
-  getKPIList({
-    page: state.currentPage,
-    size: state.pageSize,
+  getKPIListAll({
+    //page: state.currentPage,
     ...formData,
   }).then((data: any) => {
     state.loading = false

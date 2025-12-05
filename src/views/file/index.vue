@@ -16,7 +16,14 @@
                 <el-icon><Search /></el-icon>
                 <span>搜索</span>
             </el-button>
-            
+            <el-button 
+                type="danger"
+                class="search-button"
+                @click="handleBack"
+            >
+                <el-icon><ArrowLeft /></el-icon>
+                <span>后退</span>
+            </el-button>
         </div>
 
         <!-- 存储空间信息 -->
@@ -80,11 +87,28 @@
                     <div class="item-name">
                         {{ item.fileName }}
                         <el-tag 
-                            v-if="!item.canWrite" 
+                            v-if="item.canRead" 
                             size="small" 
                             type="warning"
+                            plain
                         >
-                            只读
+                            可读
+                        </el-tag>
+                        <el-tag 
+                            v-if="item.canWrite" 
+                            size="small" 
+                            type="danger"
+                            plain
+                        >
+                            可写
+                        </el-tag>
+                        <el-tag 
+                            v-if="item.canExecute" 
+                            size="small" 
+                            type="primary"
+                            plain
+                        >
+                            可执行
                         </el-tag>
                     </div>
                     <div class="item-details">
@@ -111,17 +135,6 @@
                     </el-button>
                     
                     <el-button 
-                        v-if="item.canExecute && item.isFile" 
-                        type="primary" 
-                        link 
-                        size="small"
-                        @click.stop="handleExecute(item)"
-                    >
-                        <el-icon><VideoPlay /></el-icon>
-                        运行
-                    </el-button>
-                    
-                    <el-button 
                         type="danger" 
                         link 
                         size="small"
@@ -136,7 +149,10 @@
                 <el-pagination v-model:currentPage="currentPage" background layout="prev, pager, next, jumper" :page-count="totalPage" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
             </div>
         </div>
-
+        <!-- 空状态 -->
+        <div v-if="filteredList.length === 0" class="empty-state">
+            <el-empty description="暂无文件或文件夹" />
+        </div>
         <el-upload 
         v-model:file-list="uploadFileList"
         ref="upload" 
@@ -144,7 +160,7 @@
         :on-change="onImport" drag :auto-upload="false" :on-success="handleSuccess" :show-file-list="false">
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
             <div class="el-upload__text">
-                Drop file here or <em>click to upload</em>
+                拖入文件于此或 <em>点击上传</em>
             </div>
             <template #tip>
                 <div class="file-tags-container">
@@ -167,7 +183,7 @@
             </div>
           </div>
           <div v-else class="empty-tip">
-            暂无文件
+            没有上传的文件
           </div>
         </div>
             </template>
@@ -182,10 +198,7 @@
                 清空列表
             </el-button>
         </div>
-        <!-- 空状态 -->
-        <div v-if="filteredList.length === 0" class="empty-state">
-            <el-empty description="暂无文件或文件夹" />
-        </div>
+        
     </div>
 </template>
 
@@ -201,8 +214,11 @@ import {
     Download, 
     Delete, 
     VideoPlay,
-    UploadFilled
+    UploadFilled,
+    ArrowLeft
 } from '@element-plus/icons-vue'
+
+const locate = ref("http://120.48.81.209")
 
 // 响应式数据
 const upload = ref()
@@ -280,6 +296,17 @@ const handleSuccess = (response) => {
     })
   }
 }
+const handleBack=()=>{
+    //ElMessage.info(`回退到上一个文件夹`)
+    const parts = searchPath.value.split('/').filter(Boolean);
+    if (parts.length > 1) {
+        parts.pop(); // 移除最后一级
+        searchPath.value='/' + parts.join('/') + '/';
+    }else{
+        searchPath.value='/';
+    }
+    loadFolderContent()
+}
 
 // 计算属性
 const filteredList = computed(() => {
@@ -343,85 +370,25 @@ const getShortPath = (path) => {
 // 事件处理
 const handleSearch = () => {
     // 这里可以调用API搜索特定路径
-    ElMessage.info(`搜索路径: ${searchPath.value}`)
-        getFileList({
-            folderPath:searchPath.value
-        }).then(data=>{
-            if(data.code==200){
-                fileData.value={
-                    "code":data.code,
-                    "list":data.list,
-                    "totalSpace":data.totalSpace,
-                    "usableSpace":data.usableSpace,
-                    "freeSpace":data.freeSpace
-                }
-            }else{
-                fileData.value = {
-                    "code": 200,
-                    "list": [
-                    {
-                        "fileName": "123.txt",
-                        "canExecute": true,
-                        "isFile": true,
-                        "size": "0 bytes",
-                        "parentFileName": path || "E:\\teacher_test",
-                        "canRead": true,
-                        "canWrite": true,
-                        "lastModified": "2025-12-04 15:05:35",
-                        "isDirectory": false,
-                        "isHidden": false
-                    },
-                    {
-                        "fileName": "teacher_file",
-                        "canExecute": true,
-                        "isFile": false,
-                        "size": "4096 bytes",
-                        "parentFileName": path || "E:\\teacher_test",
-                        "canRead": true,
-                        "canWrite": true,
-                        "lastModified": "2025-11-27 10:52:04",
-                        "isDirectory": true,
-                        "isHidden": false
-                    },
-                    {
-                        "fileName": "config.ini",
-                        "canExecute": false,
-                        "isFile": true,
-                        "size": "1024 bytes",
-                        "parentFileName": path || "E:\\teacher_test",
-                        "canRead": true,
-                        "canWrite": false,
-                        "lastModified": "2025-11-20 09:15:22",
-                        "isDirectory": false,
-                        "isHidden": true
-                    }
-                    ],
-                    "totalSpace": "240055742464 bytes",
-                    "usableSpace": "232521670656 bytes",
-                    "freeSpace": "232521670656 bytes"
-                }
-            }
-            console.log(fileData.value)
-        }).catch(error=>{
-            ElMessage.error('加载文件列表失败')
-            console.error('API错误:', error)
-        })
+    //ElMessage.info(`搜索路径: ${searchPath.value}`)
+    loadFolderContent()
 }
 
 const handleItemClick = (item) => {
     if (item.isDirectory) {
-        ElMessage.info(`点击文件夹: ${item.fileName}`)
+        //ElMessage.info(`点击文件夹: ${item.fileName}`)
         // 实际应该加载该文件夹内容
     } else {
-        ElMessage.info(`点击文件: ${item.fileName}`)
+        //ElMessage.info(`点击文件: ${item.fileName}`)
     }
 }
 
 const handleItemDoubleClick = (item) => {
     if (item.isDirectory) {
-        ElMessage.info(`进入文件夹: ${item.fileName}`)
+        //ElMessage.info(`进入文件夹: ${item.fileName}`)
         // 加载文件夹内容
-        loadFolderContent(item.parentFileName + '\\' + item.fileName)
+        searchPath.value=searchPath.value +item.fileName+"/"
+        loadFolderContent()
     } else if (item.isFile && item.canExecute) {
         handleExecute(item)
     }
@@ -429,19 +396,30 @@ const handleItemDoubleClick = (item) => {
 
 const handleDownload = (item) => {
     if (!item.canRead) {
-        ElMessage.warning('没有读取权限')
+        //ElMessage.warning('没有读取权限')
         return
     }
-    ElMessage.success(`开始下载: ${item.fileName}`)
+    //ElMessage.success(`开始下载: ${item.fileName}`)
     // 实际下载逻辑
+    const link = document.createElement('a')
+    const url=locate.value+searchPath.value+item.fileName
+    link.href = url
+    link.download = item.fileName
+    link.target = '_blank' // 新窗口打开
+  
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  
+    ElMessage.success(`正在下载: ${item.fileName}`)
 }
 
 const handleExecute = (item) => {
     if (!item.canExecute) {
-        ElMessage.warning('没有执行权限')
+        //ElMessage.warning('没有执行权限')
         return
     }
-    ElMessage.info(`执行文件: ${item.fileName}`)
+    //ElMessage.info(`执行文件: ${item.fileName}`)
     // 实际执行逻辑
 }
 

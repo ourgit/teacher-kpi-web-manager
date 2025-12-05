@@ -317,6 +317,21 @@ export const localRoutes: Array<RouteRecordRaw> = [
         ],
       },
       {
+        path: '/sfuw',
+        name: 'sfuw',
+        component: () => import('@/views/sfuw/index.vue'),
+        meta: {
+          title: '标准定制',
+          isLink: '',
+          isHide: false,
+          isKeepAlive: false,
+          isAffix: false,
+          isIframe: false,
+          roles: ['admin','common'],
+          icon: 'ele-Setting',
+        }
+      },
+      {
         path: '/tool',
         name: 'tool',
         component: () => import('@/layout/routerView/tool.vue'),

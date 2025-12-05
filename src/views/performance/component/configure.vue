@@ -1,9 +1,10 @@
 <template>
   <div class="configure-container">
     <!--当前kpi标题-->  
-    <div class="kpi-title">
-      <h2>{{ state.title }}</h2>
-    </div>
+  <div class="kpi-title">
+    <h2>{{ state.title }}</h2>
+    <el-button size="small" type="primary" @click="drawerVisible = true">搜索定位</el-button>
+  </div>
     
     <!-- 三栏布局 -->
     <div class="three-column-layout">
@@ -61,6 +62,11 @@
             @click="selectElement(element)"
           >
             <div class="item-name">{{ element.element }}</div>
+            <!--回显的时候，1是上级评分，0是非上级评分-->
+            <div>
+              <el-tag v-if="element.type === 1" type="danger">上级评分</el-tag>
+              <el-tag v-else="element.type === 0" type="primary">非上级评分</el-tag>
+            </div>
             <div class="item-score">{{ element.score }}分</div>
             <div class="item-actions">
               <el-button text size="small" @click.stop="openElementDialog('edit', element)">编辑</el-button>
@@ -96,6 +102,10 @@
             class="content-item"
           >
             <div class="item-name">{{ content.content }}</div>
+            <div>
+              <el-tag v-if="content.type === 1" type="danger">要求材料</el-tag>
+              <el-tag v-else="content.type === 0" type="primary">非要求材料</el-tag>
+            </div>
             <div class="item-score" :class="{ 'negative': content.score < 0 }">
               {{ content.score > 0 ? '+' : '' }}{{ content.score }}分
             </div>
@@ -113,6 +123,142 @@
         </div>
       </div>
     </div>
+
+    <!-- 抽屉：测试页 -->
+    <el-drawer
+      v-model="drawerVisible"
+      title="搜索定位页"
+      direction="rtl"
+      size="45%"
+    >
+      <div class="drawer-test-page">
+        <h3>搜索测试</h3>
+        <el-alert
+          type="info"
+          show-icon
+          :closable="false"
+          title="在这里输入关键字后搜索，点击结果即可让左侧配置页直接定位并高亮对应的指标 / 要素 / 内容。"
+        />
+
+        <div class="search-toolbar">
+          <div class="search-toolbar__left">
+            <el-tag type="success">总指标：{{ indicatorTotal }}</el-tag>
+            <el-tag type="warning">要素数：{{ elementTotal }}</el-tag>
+            <el-tag type="primary">内容数：{{ contentTotal }}</el-tag>
+          </div>
+          <div class="search-toolbar__actions">
+            <el-button size="small" type="primary" @click="triggerSearch">搜索全部</el-button>
+            <el-button size="small" @click="clearSearch">清空</el-button>
+          </div>
+        </div>
+
+        <p class="search-tip">提示：支持按回车键快速搜索；点击结果即可同步左侧的选择状态。</p>
+
+        <div class="search-section">
+          <div class="search-header">
+            <span class="search-header-title">指标搜索</span>
+            <div class="search-action">
+              <el-input
+                v-model="searchForm.indicator"
+                placeholder="输入指标名称关键词"
+                clearable
+                size="small"
+                @keyup.enter="triggerSearch"
+              >
+                <template #append>
+                  <el-button size="small" type="primary" @click="triggerSearch">搜索</el-button>
+                </template>
+              </el-input>
+            </div>
+          </div>
+          <div class="search-result" v-if="indicatorResults.length">
+            <el-timeline>
+              <el-timeline-item
+                v-for="item in indicatorResults"
+                :key="item.id"
+                :timestamp="item.subName || '—'"
+              >
+                <el-link type="primary" @click="handleIndicatorPick(item)">{{ item.indicatorName }}</el-link>
+              </el-timeline-item>
+            </el-timeline>
+          </div>
+          <el-empty v-else description="暂无匹配的指标" :image-size="60" />
+        </div>
+
+        <el-divider />
+
+        <div class="search-section">
+          <div class="search-header">
+            <span class="search-header-title">要素搜索</span>
+            <div class="search-action">
+              <el-input
+                v-model="searchForm.element"
+                placeholder="输入要素名称关键词"
+                clearable
+                size="small"
+                @keyup.enter="triggerSearch"
+              >
+                <template #append>
+                  <el-button size="small" type="primary" @click="triggerSearch">搜索</el-button>
+                </template>
+              </el-input>
+            </div>
+          </div>
+          <div class="search-result" v-if="elementResults.length">
+            <el-table :data="elementResults" size="small" border stripe>
+              <el-table-column prop="element" label="要素" min-width="120">
+                <template #default="{ row }">
+                  <el-link type="primary" @click="handleElementPick(row)">{{ row.element }}</el-link>
+                </template>
+              </el-table-column>
+              <el-table-column prop="indicatorName" label="所属指标" min-width="120" />
+              <el-table-column prop="score" label="分值" width="80" />
+            </el-table>
+          </div>
+          <el-empty v-else description="暂无匹配的要素" :image-size="60" />
+        </div>
+
+        <el-divider />
+
+        <div class="search-section">
+          <div class="search-header">
+            <span class="search-header-title">内容搜索</span>
+            <div class="search-action">
+              <el-input
+                v-model="searchForm.content"
+                placeholder="输入内容名称关键词"
+                clearable
+                size="small"
+                @keyup.enter="triggerSearch"
+              >
+                <template #append>
+                  <el-button size="small" type="primary" @click="triggerSearch">搜索</el-button>
+                </template>
+              </el-input>
+            </div>
+          </div>
+          <div class="search-result" v-if="contentResults.length">
+            <el-table :data="contentResults" size="small" border stripe>
+              <el-table-column prop="content" label="内容" min-width="150">
+                <template #default="{ row }">
+                  <el-link type="primary" @click="handleContentPick(row)">{{ row.content }}</el-link>
+                </template>
+              </el-table-column>
+              <el-table-column prop="element" label="所属要素" min-width="120" />
+              <el-table-column prop="indicatorName" label="所属指标" min-width="120" />
+              <el-table-column prop="score" label="分值" width="80">
+                <template #default="{ row }">
+                  <span :class="{ negative: row.score < 0 }">
+                    {{ row.score > 0 ? '+' : '' }}{{ row.score }}
+                  </span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <el-empty v-else description="暂无匹配的内容" :image-size="60" />
+        </div>
+      </div>
+    </el-drawer>
     <!-- 指标弹窗 -->
     <el-dialog
       :title="indicatorDialog.mode === 'add' ? '新增指标' : '编辑指标'"
@@ -152,10 +298,16 @@
         <el-form-item label="评价标准" prop="criteria">
           <el-input v-model="elementDialog.form.criteria" placeholder="请输入评价标准" />
         </el-form-item>
-        <el-form-item label="模式" prop="type">
+        <el-form-item label="模式" prop="typeId">
           <el-select v-model="elementDialog.form.type" placeholder="请选择模式">
             <el-option label="手动" :value="0" />
             <el-option label="机器评分" :value="1" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="是否需要上级确认" prop="type">
+          <el-select v-model="elementDialog.form.type" placeholder="请选择模式">
+            <el-option label="需要" :value="0" />
+            <el-option label="不需要" :value="1" />
           </el-select>
         </el-form-item>
         <el-form-item label="分值" prop="score">
@@ -254,6 +406,12 @@ const state = reactive({
 })
 
 const scoreTypeList = ref<any[]>([])
+const drawerVisible = ref(false)
+const searchForm = reactive({
+  indicator: '',
+  element: '',
+  content: '',
+})
 const indicatorFormRef = ref()
 const elementFormRef = ref()
 const contentFormRef = ref()
@@ -339,6 +497,95 @@ const currentContentList = computed(() => {
   if (!state.selectedElement) return []
   return state.selectedElement.contentList || []
 })
+
+const indicatorResults = computed(() => {
+  const keyword = searchForm.indicator.trim().toLowerCase()
+  if (!keyword) return []
+  return state.list.filter((item: any) => {
+    const name = (item.indicatorName || '').toLowerCase()
+    const sub = (item.subName || '').toLowerCase()
+    return name.includes(keyword) || sub.includes(keyword)
+  })
+})
+
+const elementResults = computed(() => {
+  const keyword = searchForm.element.trim().toLowerCase()
+  if (!keyword) return []
+  const list = state.list.flatMap((indicator: any) =>
+    (indicator.elementList || []).map((el: any) => ({
+      ...el,
+      indicatorName: indicator.indicatorName,
+      indicatorId: indicator.id,
+    }))
+  )
+  return list.filter((el: any) => (el.element || '').toLowerCase().includes(keyword))
+})
+
+const contentResults = computed(() => {
+  const keyword = searchForm.content.trim().toLowerCase()
+  if (!keyword) return []
+  const list = state.list.flatMap((indicator: any) =>
+    (indicator.elementList || []).flatMap((el: any) =>
+      (el.contentList || []).map((c: any) => ({
+        ...c,
+        element: el.element,
+        elementId: el.id,
+        indicatorName: indicator.indicatorName,
+        indicatorId: indicator.id,
+      }))
+    )
+  )
+  return list.filter((c: any) => (c.content || '').toLowerCase().includes(keyword))
+})
+
+const indicatorTotal = computed(() => state.list.length)
+const elementTotal = computed(() =>
+  state.list.reduce((sum: number, it: any) => sum + (it.elementList?.length || 0), 0)
+)
+const contentTotal = computed(() =>
+  state.list.reduce(
+    (sum: number, it: any) =>
+      sum +
+      (it.elementList || []).reduce(
+        (acc: number, el: any) => acc + (el.contentList?.length || 0),
+        0
+      ),
+    0
+  )
+)
+
+const triggerSearch = () => {
+  // 计算属性自动根据关键字更新
+}
+
+const clearSearch = () => {
+  searchForm.indicator = ''
+  searchForm.element = ''
+  searchForm.content = ''
+}
+
+const handleIndicatorPick = (indicator: any) => {
+  selectIndicator(indicator)
+}
+
+const handleElementPick = (element: any) => {
+  const indicator = state.list.find((item: any) => item.id === element.indicatorId)
+  if (indicator) {
+    selectIndicator(indicator)
+    const target = (indicator.elementList || []).find((el: any) => el.id === element.id)
+    if (target) selectElement(target)
+  }
+}
+
+const handleContentPick = (content: any) => {
+  const indicator = state.list.find((item: any) => item.id === content.indicatorId)
+  if (!indicator) return
+  selectIndicator(indicator)
+  const element = (indicator.elementList || []).find((el: any) => el.id === content.elementId)
+  if (element) {
+    selectElement(element)
+  }
+}
 
 const restoreSelection = (indicatorId?: number, elementId?: number) => {
   if (!indicatorId) {
@@ -571,6 +818,10 @@ onMounted(() => {
   padding: 20px;
   
   .kpi-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     padding-bottom: 16px;
     margin-bottom: 20px;
     border-bottom: 2px solid var(--el-border-color);
@@ -580,6 +831,62 @@ onMounted(() => {
       font-size: 20px;
       font-weight: 600;
       color: var(--el-text-color-primary);
+    }
+  }
+  
+  .drawer-test-page {
+    h3 {
+      margin: 0 0 12px;
+    }
+    p {
+      margin: 0 0 16px;
+      color: var(--el-text-color-secondary);
+    }
+    .search-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 12px 0;
+
+      &__left {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      &__actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+    }
+
+    .search-tip {
+      margin: 0 0 12px;
+      color: var(--el-text-color-secondary);
+    }
+
+    .search-section {
+      margin-bottom: 16px;
+    }
+    .search-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .search-action {
+      flex: 0 0 clamp(220px, 40vw, 360px);
+    }
+    .search-result {
+      background: var(--el-bg-color-page);
+      border: 1px solid var(--el-border-color-lighter);
+      border-radius: 6px;
+      padding: 12px;
     }
   }
   
@@ -820,5 +1127,19 @@ onMounted(() => {
       min-height: 200px;
     }
   }
+}
+
+.search-header-title {
+  /* 基础样式 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(14px, 2vw, 18px); /* 响应式字体大小 */
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--el-text-color-regular);
+  
+  /* 优化显示 */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: 0.3px;
 }
 </style>
