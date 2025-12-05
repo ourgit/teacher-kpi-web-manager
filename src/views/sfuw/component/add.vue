@@ -3,7 +3,7 @@
     <el-dialog
       title="添加标准"
       v-model="isShowDialog"
-      width="600px"
+      width="1000px"
       :close-on-click-modal="false"
       :destroy-on-close="true"
       @closed="handleDialogClosed"
@@ -46,8 +46,8 @@
                 <span class="formula-label">分数</span>
                 <el-form-item prop="op" class="inline-form-item">
                   <el-select v-model="ruleForm.op" placeholder="连接符" style="width: 100px">
-                    <el-option label="AND" value="AND" />
-                    <el-option label="OR" value="OR" />
+                    <el-option label="AND" value="and" />
+                    <el-option label="OR" value="or" />
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="rightLimitScore" class="inline-form-item">
