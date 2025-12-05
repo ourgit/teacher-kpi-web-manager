@@ -113,3 +113,14 @@ export function withDraw(data: object) {
     data,
   })
 }
+
+/**
+ * kpi下信息的连锁查询
+ */
+export function getKpiWithOtherList(data: object) {
+  return request({
+    url: '/v1/tk/kpi/list/all/',
+    method: 'post',
+    data,
+  })
+}

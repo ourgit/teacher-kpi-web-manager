@@ -1,138 +1,561 @@
 <template>
-  <div class="page-container layout-padding">
-    <el-card shadow="hover" class="layout-padding-auto">
-      <div class="mb20">
-        <el-button size="default" @click="goBack">
-          <el-icon>
-            <ele-ArrowLeft />
-          </el-icon>
-          返回
-        </el-button>
+  <div class="configure-container">
+    <!--当前kpi标题-->  
+    <div class="kpi-title">
+      <h2>{{ state.title }}</h2>
+    </div>
+    
+    <!-- 三栏布局 -->
+    <div class="three-column-layout">
+      <!-- 左侧：指标列表 -->
+      <div class="left-panel">
+        <div class="panel-header">
+          <h3>指标</h3>
+          <div class="panel-actions">
+            <el-button size="small" type="primary" @click.stop="openIndicatorDialog('add')">新增</el-button>
+          </div>
+        </div>
+        <div class="panel-content">
+          <div 
+            v-for="indicator in state.list" 
+            :key="indicator.id" 
+            class="indicator-item"
+            :class="{ 'active': state.selectedIndicator?.id === indicator.id }"
+            @click="selectIndicator(indicator)"
+          >
+            <div class="item-name">{{ indicator.indicatorName }}</div>
+            <div class="item-meta">
+              <span class="item-subname">{{ indicator.subName }}</span>
+              <span class="item-score">{{ indicator.score }}分</span>
+              <div class="item-actions">
+                <el-button text size="small" @click.stop="openIndicatorDialog('edit', indicator)">编辑</el-button>
+                <el-button text size="small" type="danger" @click.stop="handleDeleteIndicator(indicator)">删除</el-button>
+              </div>
+            </div>
+          </div>
+          <div v-if="!state.list || state.list.length === 0" class="empty-state">
+            <el-empty description="暂无指标" :image-size="80" />
+          </div>
+        </div>
       </div>
-      <el-form :model="formData" label-width="120px" v-loading="loading">
-        <el-row :gutter="35">
-          <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" class="mb20">
-            <el-form-item label="KPI ID">
-              <el-input v-model="formData.id" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" class="mb20">
-            <el-form-item label="KPI标题">
-              <el-input v-model="formData.title" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="35">
-          <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" class="mb20">
-            <el-form-item label="创建时间">
-              <el-input v-model="formData.createTime" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" class="mb20">
-            <el-form-item label="截至时间">
-              <el-input v-model="formData.endTime" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="35">
-          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
-            <el-form-item label="配置内容">
-              <el-input
-                v-model="formData.config"
-                type="textarea"
-                :rows="6"
-                placeholder="请输入配置内容"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+      
+      <!-- 中间：要素列表 -->
+      <div class="middle-panel">
+        <div class="panel-header">
+          <h3>要素</h3>
+          <span v-if="state.selectedIndicator" class="panel-subtitle">
+            {{ state.selectedIndicator.indicatorName }}
+          </span>
+          <div class="panel-actions">
+            <el-button size="small" type="primary" :disabled="!state.selectedIndicator" @click.stop="openElementDialog('add')">
+              新增
+            </el-button>
+          </div>
+        </div>
+        <div class="panel-content">
+          <div 
+            v-for="element in currentElementList" 
+            :key="element.id" 
+            class="element-item"
+            :class="{ 'active': state.selectedElement?.id === element.id }"
+            @click="selectElement(element)"
+          >
+            <div class="item-name">{{ element.element }}</div>
+            <div class="item-score">{{ element.score }}分</div>
+            <div class="item-actions">
+              <el-button text size="small" @click.stop="openElementDialog('edit', element)">编辑</el-button>
+              <el-button text size="small" type="danger" @click.stop="handleDeleteElement(element)">删除</el-button>
+            </div>
+          </div>
+          <div v-if="!state.selectedIndicator" class="empty-state">
+            <el-empty description="请先选择指标" :image-size="80" />
+          </div>
+          <div v-else-if="currentElementList.length === 0" class="empty-state">
+            <el-empty description="暂无要素" :image-size="80" />
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右侧：内容列表 -->
+      <div class="right-panel">
+        <div class="panel-header">
+          <h3>内容</h3>
+          <span v-if="state.selectedElement" class="panel-subtitle">
+            {{ state.selectedElement.element }}
+          </span>
+          <div class="panel-actions">
+            <el-button size="small" type="primary" :disabled="!state.selectedElement" @click.stop="openContentDialog('add')">
+              新增
+            </el-button>
+          </div>
+        </div>
+        <div class="panel-content">
+          <div 
+            v-for="content in currentContentList" 
+            :key="content.id" 
+            class="content-item"
+          >
+            <div class="item-name">{{ content.content }}</div>
+            <div class="item-score" :class="{ 'negative': content.score < 0 }">
+              {{ content.score > 0 ? '+' : '' }}{{ content.score }}分
+            </div>
+            <div class="item-actions">
+              <el-button text size="small" @click.stop="openContentDialog('edit', content)">编辑</el-button>
+              <el-button text size="small" type="danger" @click.stop="handleDeleteContent(content)">删除</el-button>
+            </div>
+          </div>
+          <div v-if="!state.selectedElement" class="empty-state">
+            <el-empty description="请先选择要素" :image-size="80" />
+          </div>
+          <div v-else-if="currentContentList.length === 0" class="empty-state">
+            <el-empty description="暂无内容" :image-size="80" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 指标弹窗 -->
+    <el-dialog
+      :title="indicatorDialog.mode === 'add' ? '新增指标' : '编辑指标'"
+      v-model="indicatorDialog.visible"
+      width="520px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form ref="indicatorFormRef" :model="indicatorDialog.form" :rules="indicatorDialog.rules" label-width="100px">
+        <el-form-item label="指标名称" prop="indicatorName">
+          <el-input v-model="indicatorDialog.form.indicatorName" placeholder="请输入指标名称" />
+        </el-form-item>
+        <el-form-item label="附属名称" prop="subName">
+          <el-input v-model="indicatorDialog.form.subName" placeholder="请输入附属名称" />
+        </el-form-item>
       </el-form>
-      <div class="mt20">
-        <el-button type="primary" @click="onSave" :loading="saving">保存</el-button>
-        <el-button @click="goBack">取消</el-button>
-      </div>
-    </el-card>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="indicatorDialog.visible = false">取 消</el-button>
+          <el-button type="primary" :loading="indicatorDialog.loading" @click="submitIndicator">保 存</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 要素弹窗 -->
+    <el-dialog
+      :title="elementDialog.mode === 'add' ? '新增要素' : '编辑要素'"
+      v-model="elementDialog.visible"
+      width="560px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form ref="elementFormRef" :model="elementDialog.form" :rules="elementDialog.rules" label-width="100px">
+        <el-form-item label="评价要素" prop="element">
+          <el-input v-model="elementDialog.form.element" placeholder="请输入评价要素" />
+        </el-form-item>
+        <el-form-item label="评价标准" prop="criteria">
+          <el-input v-model="elementDialog.form.criteria" placeholder="请输入评价标准" />
+        </el-form-item>
+        <el-form-item label="模式" prop="type">
+          <el-select v-model="elementDialog.form.type" placeholder="请选择模式">
+            <el-option label="手动" :value="0" />
+            <el-option label="机器评分" :value="1" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="分值" prop="score">
+          <el-input v-model="elementDialog.form.score" placeholder="请输入分值" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="elementDialog.visible = false">取 消</el-button>
+          <el-button type="primary" :loading="elementDialog.loading" @click="submitElement">保 存</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 内容弹窗 -->
+    <el-dialog
+      :title="contentDialog.mode === 'add' ? '新增内容' : '编辑内容'"
+      v-model="contentDialog.visible"
+      width="580px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form ref="contentFormRef" :model="contentDialog.form" :rules="contentDialog.rules" label-width="110px">
+        <el-form-item label="内容名称" prop="content">
+          <el-input v-model="contentDialog.form.content" placeholder="请输入内容名称" />
+        </el-form-item>
+        <el-form-item label="分权" prop="score">
+          <el-input-number
+            v-model="contentDialog.form.score"
+            :step="0.5"
+            :precision="2"
+            controls-position="right"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="得分类型" prop="typeId">
+          <el-select v-model="contentDialog.form.typeId" placeholder="请选择得分类型">
+            <el-option label="请选择得分类型" :value="0" />
+            <el-option
+              v-for="item in scoreTypeList"
+              :key="item.id"
+              :label="item.description ? `${item.description}（ID:${item.id}）` : `类型ID：${item.id}`"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="封顶" prop="topScore">
+          <el-input v-model="contentDialog.form.topScore" placeholder="请输入封顶" />
+        </el-form-item>
+        <el-form-item label="封底" prop="bottomScore">
+          <el-input v-model="contentDialog.form.bottomScore" placeholder="请输入封底" />
+        </el-form-item>
+        <el-form-item label="文件上传" prop="type">
+          <el-radio-group v-model="contentDialog.form.type">
+            <el-radio :label="0">无需文件</el-radio>
+            <el-radio :label="1">需要文件</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="contentDialog.visible = false">取 消</el-button>
+          <el-button type="primary" :loading="contentDialog.loading" @click="submitContent">保 存</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-// import { getKpiDetail, updateKpiConfig } from '@/api/kpi/index'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getKpiWithOtherList, deleteKpi } from '@/api/kpi/index'
+import { addIndicator, updateIndicator } from '@/api/indicator/index'
+import { addElement, updateElement } from '@/api/element/index'
+import { addContent, updateContent } from '@/api/content/index'
+import { getJsonList } from '@/api/tool/index'
 
 const route = useRoute()
 const router = useRouter()
 
-const loading = ref(false)
-const saving = ref(false)
-const formData = reactive({
-  id: '',
+const state = reactive({
+  formData: {
+    page: '',
+    kpiId: '',
+    indicatorName: '',
+    elementName: '',
+    contentName: '',
+  },
   title: '',
-  createTime: '',
-  endTime: '',
-  config: ''
+  list: [] as any[],
+  selectedIndicator: null as any,
+  selectedElement: null as any,
+  loading: false,
 })
 
-// 返回上一页
+const scoreTypeList = ref<any[]>([])
+const indicatorFormRef = ref()
+const elementFormRef = ref()
+const contentFormRef = ref()
+
+const indicatorDialog = reactive({
+  visible: false,
+  mode: 'add' as 'add' | 'edit',
+  loading: false,
+  form: {
+    id: undefined as number | undefined,
+    indicatorName: '',
+    subName: '',
+    kpiId: '',
+  },
+  rules: {
+    indicatorName: [{ required: true, message: '请输入指标名称', trigger: 'blur' }],
+    subName: [{ required: true, message: '请输入附属名称', trigger: 'blur' }],
+  },
+})
+
+const elementDialog = reactive({
+  visible: false,
+  mode: 'add' as 'add' | 'edit',
+  loading: false,
+  form: {
+    id: undefined as number | undefined,
+    element: '',
+    criteria: '',
+    type: 0,
+    score: '',
+    indicatorId: '' as number | string,
+  },
+  rules: {
+    element: [{ required: true, message: '请输入评价要素', trigger: 'blur' }],
+    criteria: [{ required: true, message: '请输入评价标准', trigger: 'blur' }],
+    type: [{ required: true, message: '请选择模式', trigger: 'change' }],
+    score: [{ required: true, message: '请输入分值', trigger: 'blur' }],
+  },
+})
+
+const contentDialog = reactive({
+  visible: false,
+  mode: 'add' as 'add' | 'edit',
+  loading: false,
+  form: {
+    id: undefined as number | undefined,
+    content: '',
+    score: 0,
+    elementId: 0,
+    typeId: 0,
+    topScore: '',
+    bottomScore: '',
+    type: 0,
+  },
+  rules: {
+    content: [{ required: true, message: '请输入内容名称', trigger: 'blur' }],
+    score: [{ required: true, message: '请输入分权', trigger: 'blur' }],
+    elementId: [{ required: true, message: '请选择要素', trigger: 'change' }],
+    typeId: [{ required: true, message: '请选择得分类型', trigger: 'change' }],
+    type: [{ required: true, message: '请选择是否需要文件', trigger: 'change' }],
+  },
+})
+
 const goBack = () => {
   router.back()
 }
 
-// 获取详情数据
+const selectIndicator = (indicator: any) => {
+  state.selectedIndicator = indicator
+  state.selectedElement = null
+}
+
+const selectElement = (element: any) => {
+  state.selectedElement = element
+}
+
+const currentElementList = computed(() => {
+  if (!state.selectedIndicator) return []
+  return state.selectedIndicator.elementList || []
+})
+
+const currentContentList = computed(() => {
+  if (!state.selectedElement) return []
+  return state.selectedElement.contentList || []
+})
+
+const restoreSelection = (indicatorId?: number, elementId?: number) => {
+  if (!indicatorId) {
+    state.selectedIndicator = null
+    state.selectedElement = null
+    return
+  }
+  const indicator = state.list.find((item: any) => item.id === indicatorId)
+  state.selectedIndicator = indicator || null
+  if (!indicator || !elementId) {
+    state.selectedElement = null
+    return
+  }
+  const element = (indicator.elementList || []).find((item: any) => item.id === elementId)
+  state.selectedElement = element || null
+}
+
+const loadScoreTypeList = () => {
+  getJsonList({})
+    .then((data: any) => {
+      scoreTypeList.value = data.list || []
+    })
+    .catch(() => {})
+}
+
 const getDetail = () => {
   const id = route.query.id as string
+  const name = route.query.name as string
   if (!id) {
     ElMessage.warning('缺少ID参数')
     goBack()
     return
   }
-  
-  formData.id = id
-  loading.value = true
-  
-  // TODO: 调用API获取详情
-  // getKpiDetail({ id }).then((data: any) => {
-  //   formData.title = data.title || ''
-  //   formData.createTime = data.createTime || ''
-  //   formData.endTime = data.endTime || ''
-  //   formData.config = data.config || ''
-  //   loading.value = false
-  // }).catch(() => {
-  //   loading.value = false
-  // })
-  
-  // 临时模拟数据
-  setTimeout(() => {
-    formData.title = '示例KPI标题'
-    formData.createTime = '2024-01-01 00:00:00'
-    formData.endTime = '2024-12-31 23:59:59'
-    loading.value = false
-  }, 500)
+  state.loading = true
+  state.formData.kpiId = id
+  state.title = name
+  getKpiWithOtherList(state.formData)
+    .then((res: any) => {
+      if (res.code === 200) {
+        state.list = res.list || []
+      } else {
+        ElMessage.error(res.message || '获取数据失败')
+      }
+      state.loading = false
+    })
+    .catch(() => {
+      state.loading = false
+      ElMessage.error('获取数据失败')
+    })
 }
 
-// 保存配置
-const onSave = () => {
-  saving.value = true
-  
-  // TODO: 调用API保存配置
-  // updateKpiConfig({
-  //   id: formData.id,
-  //   config: formData.config
-  // }).then(() => {
-  //   ElMessage.success('保存成功')
-  //   saving.value = false
-  //   goBack()
-  // }).catch(() => {
-  //   saving.value = false
-  // })
-  
-  // 临时模拟保存
-  setTimeout(() => {
-    ElMessage.success('保存成功')
-    saving.value = false
-    // goBack()
-  }, 500)
+const refreshAndKeepSelection = () => {
+  const indicatorId = state.selectedIndicator?.id
+  const elementId = state.selectedElement?.id
+  return getKpiWithOtherList(state.formData)
+    .then((res: any) => {
+      if (res.code === 200) {
+        state.list = res.list || []
+        restoreSelection(indicatorId, elementId)
+      } else {
+        ElMessage.error(res.message || '操作失败')
+      }
+    })
+    .catch(() => {
+      ElMessage.error('操作失败')
+    })
+}
+
+const openIndicatorDialog = (mode: 'add' | 'edit', indicator?: any) => {
+  indicatorDialog.mode = mode
+  indicatorDialog.visible = true
+  indicatorDialog.form = {
+    id: indicator?.id,
+    indicatorName: indicator?.indicatorName || '',
+    subName: indicator?.subName || '',
+    kpiId: state.formData.kpiId,
+  }
+  nextTick(() => indicatorFormRef.value?.clearValidate())
+}
+
+const submitIndicator = () => {
+  indicatorFormRef.value?.validate(async (valid: boolean) => {
+    if (!valid) return
+    indicatorDialog.loading = true
+    const payload = { ...indicatorDialog.form, kpiId: state.formData.kpiId }
+    try {
+      if (indicatorDialog.mode === 'add') {
+        await addIndicator(payload)
+        ElMessage.success('新增成功')
+      } else {
+        await updateIndicator([payload])
+        ElMessage.success('更新成功')
+      }
+      indicatorDialog.visible = false
+      await refreshAndKeepSelection()
+    } finally {
+      indicatorDialog.loading = false
+    }
+  })
+}
+
+const handleDeleteIndicator = (indicator: any) => {
+  ElMessageBox.confirm('删除该指标会同时删除其要素和内容，确认继续？', '提示', { type: 'warning' })
+    .then(async () => {
+      await deleteKpi([{ indicatorIds: indicator.id }])
+      ElMessage.success('删除成功')
+      if (state.selectedIndicator?.id === indicator.id) {
+        state.selectedIndicator = null
+        state.selectedElement = null
+      }
+      await refreshAndKeepSelection()
+    })
+    .catch(() => {})
+}
+
+const openElementDialog = (mode: 'add' | 'edit', element?: any) => {
+  if (!state.selectedIndicator) {
+    ElMessage.warning('请先选择指标')
+    return
+  }
+  elementDialog.mode = mode
+  elementDialog.visible = true
+  elementDialog.form = {
+    id: element?.id,
+    element: element?.element || '',
+    criteria: element?.criteria || '',
+    type: element?.type ?? 0,
+    score: element?.score ?? '',
+    indicatorId: state.selectedIndicator.id,
+  }
+  nextTick(() => elementFormRef.value?.clearValidate())
+}
+
+const submitElement = () => {
+  elementFormRef.value?.validate(async (valid: boolean) => {
+    if (!valid) return
+    elementDialog.loading = true
+    const payload = { ...elementDialog.form, indicatorId: state.selectedIndicator?.id }
+    try {
+      if (elementDialog.mode === 'add') {
+        await addElement(payload)
+        ElMessage.success('新增成功')
+      } else {
+        await updateElement(payload)
+        ElMessage.success('更新成功')
+      }
+      elementDialog.visible = false
+      await refreshAndKeepSelection()
+    } finally {
+      elementDialog.loading = false
+    }
+  })
+}
+
+const handleDeleteElement = (element: any) => {
+  ElMessageBox.confirm('删除该要素会同时删除其内容，确认继续？', '提示', { type: 'warning' })
+    .then(async () => {
+      await deleteKpi([{ elementIds: element.id }])
+      ElMessage.success('删除成功')
+      if (state.selectedElement?.id === element.id) {
+        state.selectedElement = null
+      }
+      await refreshAndKeepSelection()
+    })
+    .catch(() => {})
+}
+
+const openContentDialog = (mode: 'add' | 'edit', content?: any) => {
+  if (!state.selectedElement) {
+    ElMessage.warning('请先选择要素')
+    return
+  }
+  contentDialog.mode = mode
+  contentDialog.visible = true
+  contentDialog.form = {
+    id: content?.id,
+    content: content?.content || '',
+    score: content?.score ?? 0,
+    elementId: state.selectedElement.id,
+    typeId: content?.typeId ?? 0,
+    topScore: content?.topScore ?? '',
+    bottomScore: content?.bottomScore ?? '',
+    type: content?.type ?? 0,
+  }
+  loadScoreTypeList()
+  nextTick(() => contentFormRef.value?.clearValidate())
+}
+
+const submitContent = () => {
+  contentFormRef.value?.validate(async (valid: boolean) => {
+    if (!valid) return
+    contentDialog.loading = true
+    const payload = { ...contentDialog.form, elementId: state.selectedElement?.id }
+    try {
+      if (contentDialog.mode === 'add') {
+        await addContent(payload)
+        ElMessage.success('新增成功')
+      } else {
+        await updateContent(payload)
+        ElMessage.success('更新成功')
+      }
+      contentDialog.visible = false
+      await refreshAndKeepSelection()
+    } finally {
+      contentDialog.loading = false
+    }
+  })
+}
+
+const handleDeleteContent = (content: any) => {
+  ElMessageBox.confirm('确认删除该内容？', '提示', { type: 'warning' })
+    .then(async () => {
+      await deleteKpi([{ contentIds: content.id }])
+      ElMessage.success('删除成功')
+      await refreshAndKeepSelection()
+    })
+    .catch(() => {})
 }
 
 onMounted(() => {
@@ -141,11 +564,261 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.mb20 {
-  margin-bottom: 20px;
-}
+.configure-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  
+  .kpi-title {
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--el-border-color);
+    
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--el-text-color-primary);
+    }
+  }
+  
+  .three-column-layout {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    min-height: calc(100vh - 200px);
+    //min-height: 500px;
+    
+    .left-panel,
+    .middle-panel,
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--el-border-color);
+      border-radius: 8px;
+      background: var(--el-bg-color);
+      overflow: hidden;
+      
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 16px 20px;
+        background: var(--el-color-primary-light-9);
+        border-bottom: 1px solid var(--el-border-color);
+        
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--el-text-color-primary);
+        }
+        
+        .panel-subtitle {
+          display: block;
+          margin-top: 8px;
+          font-size: 14px;
+          color: var(--el-text-color-regular);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
 
-.mt20 {
-  margin-top: 20px;
+        .panel-actions {
+          display: flex;
+          gap: 8px;
+          margin-left: auto;
+        }
+      }
+      
+      .panel-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        
+        // 自定义滚动条
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        &::-webkit-scrollbar-track {
+          background: var(--el-bg-color-page);
+          border-radius: 3px;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          background: var(--el-border-color);
+          border-radius: 3px;
+          
+          &:hover {
+            background: var(--el-border-color-darker);
+          }
+        }
+      }
+    }
+    
+    .left-panel {
+      width: 20%;
+      //min-width: 300px;
+      
+      .indicator-item {
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        border: 1px solid var(--el-border-color-lighter);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: var(--el-bg-color-page);
+        
+        &:hover {
+          border-color: var(--el-color-primary);
+          background: var(--el-color-primary-light-9);
+        }
+        
+        &.active {
+          border-color: var(--el-color-primary);
+          background: var(--el-color-primary-light-9);
+          box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+        }
+        
+        .item-name {
+          font-size: 15px;
+          font-weight: 500;
+          color: var(--el-text-color-primary);
+          margin-bottom: 8px;
+          word-break: break-word;
+        }
+        
+        .item-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 12px;
+          gap: 8px;
+          
+          .item-subname {
+            color: var(--el-text-color-regular);
+          }
+          
+          .item-score {
+            color: var(--el-color-primary);
+            font-weight: 600;
+          }
+
+          .item-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+    
+    .middle-panel {
+      flex: 1;
+      width: 30%;
+      //min-width: 300px;
+      
+      .element-item {
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        border: 1px solid var(--el-border-color-lighter);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: var(--el-bg-color-page);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        &:hover {
+          border-color: var(--el-color-primary);
+          background: var(--el-color-primary-light-9);
+        }
+        
+        &.active {
+          border-color: var(--el-color-primary);
+          background: var(--el-color-primary-light-9);
+          box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+        }
+        
+        .item-name {
+          font-size: 14px;
+          color: var(--el-text-color-primary);
+          flex: 1;
+          word-break: break-word;
+        }
+        
+        .item-score {
+          font-size: 14px;
+          color: var(--el-color-primary);
+          font-weight: 600;
+          margin-left: 12px;
+          flex-shrink: 0;
+        }
+
+        .item-actions {
+          display: flex;
+          gap: 6px;
+          margin-left: 12px;
+          flex-shrink: 0;
+        }
+      }
+    }
+    
+    .right-panel {
+      flex: 1;
+      width: 50%;
+      //min-width: 300px;
+      
+      .content-item {
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        border: 1px solid var(--el-border-color-lighter);
+        border-radius: 6px;
+        background: var(--el-bg-color-page);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        .item-name {
+          font-size: 14px;
+          color: var(--el-text-color-regular);
+          flex: 1;
+          word-break: break-word;
+        }
+        
+        .item-score {
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--el-color-success);
+          margin-left: 12px;
+          flex-shrink: 0;
+          
+          &.negative {
+            color: var(--el-color-danger);
+          }
+        }
+
+        .item-actions {
+          display: flex;
+          gap: 6px;
+          margin-left: 12px;
+          flex-shrink: 0;
+        }
+      }
+    }
+    
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 200px;
+    }
+  }
 }
 </style>
