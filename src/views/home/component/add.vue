@@ -84,7 +84,7 @@ const onSubmit = () => {
   dialogFormRef.value.validate((valid: boolean) => {
     if (valid) {
       state.loading = true
-      addTeacher([state.ruleForm])
+      addTeacher(state.ruleForm)
         .then(() => {
           ElMessage({
             message: '添加成功',
