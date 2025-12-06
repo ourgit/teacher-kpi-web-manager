@@ -66,7 +66,7 @@ const onSubmit = () => {
     if (valid) {
       state.loading = true
       console.log(state.ruleForm)
-      deleteTeacher([state.ruleForm])
+      deleteTeacher(state.ruleForm)
         .then(() => {
           ElMessage({
             message: '删除成功',

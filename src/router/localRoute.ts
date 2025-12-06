@@ -337,7 +337,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
         component: () => import('@/layout/routerView/tool.vue'),
         redirect: '/tool/json',
         meta: {
-          title: '工具',
+          title: '评分方式',
           isLink: '',
           isHide: false,
           isKeepAlive: true,
@@ -371,7 +371,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
         component: () => import('@/layout/routerView/parent.vue'),
         redirect: '/file/index',
         meta: {
-          title: '文件',
+          title: '文件列表',
           isLink: '',
           isHide: false,
           isKeepAlive: true,
