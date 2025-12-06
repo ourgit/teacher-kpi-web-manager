@@ -50,7 +50,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
         component: () => import('@/views/home/index.vue'),
         meta: {
           page: 'home/index',
-          title: '首页',
+          title: '教师配置',
           isLink: '',
           isHide: false,
           isKeepAlive: true,
@@ -63,11 +63,11 @@ export const localRoutes: Array<RouteRecordRaw> = [
       //kpi
       {
         path: '/kpi',
-        name: 'kpi',
+        name: 'KPI',
         component: () => import('@/layout/routerView/parent.vue'),
         redirect: '/kpi/index',
         meta: {
-          title: 'KPI',
+          title: '绩效管理',
           isLink: '',
           isHide: false,
           isKeepAlive: true,
@@ -82,7 +82,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
             name: 'kpiIndex',
             component: () => import('@/views/kpi/index.vue'),
             meta: {
-              title: 'KPI管理',
+              title: '绩效管理与下发',
               isLink: '',
               isHide: false,
               isKeepAlive: true,
@@ -97,7 +97,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
             name: 'kpidDispatch',
             component: () => import('@/views/kpi/dispatch/index.vue'),
             meta: {
-              title: '下发管理',
+              title: '撤销下发',
               isLink: '',
               isHide: false,
               isKeepAlive: true,
@@ -153,115 +153,115 @@ export const localRoutes: Array<RouteRecordRaw> = [
           icon: 'ele-Setting',
         }
       },
-       //indicator
-      {
-        path: '/indicator',
-        name: 'indicator',
-        component: () => import('@/layout/routerView/parent.vue'),
-        redirect: '/indicator/index',
-        meta: {
-          title: '指标',
-          isLink: '',
-          isHide: false,
-          isKeepAlive: true,
-          isAffix: false,
-          isIframe: false,
-          roles: ['admin','common'],
-          icon: 'ele-Switch',
-        },
-        children: [
-          {
-            path: '/indicator/index',
-            name: 'indicatorIndex',
-            component: () => import('@/views/indicator/index.vue'),
-            meta: {
-              title: '指标管理',
-              isLink: '',
-              isHide: false,
-              isKeepAlive: true,
-              isAffix: false,
-              isIframe: false,
-              roles: ['admin','common'],
-              icon: 'ele-Switch',
-            }
-          }
-        ],
-      },
-       //element
-      {
-        path: '/element',
-        name: 'element',
-        component: () => import('@/layout/routerView/parent.vue'),
-        redirect: '/element/index',
-        meta: {
-          title: '要素',
-          isLink: '',
-          isHide: false,
-          isKeepAlive: true,
-          isAffix: false,
-          isIframe: false,
-          roles: ['admin','common'],
-          icon: 'ele-Orange',
-        },
-        children: [
-          {
-            path: '/element/index',
-            name: 'elementIndex',
-            component: () => import('@/views/element/index.vue'),
-            meta: {
-              title: '要素管理',
-              isLink: '',
-              isHide: false,
-              isKeepAlive: true,
-              isAffix: false,
-              isIframe: false,
-              roles: ['admin','common'],
-              icon: 'ele-Orange',
-            }
-          },
-        ],
-      },
-       //content
-      {
-        path: '/content',
-        name: 'content',
-        component: () => import('@/layout/routerView/parent.vue'),
-        redirect: '/content/index',
-        meta: {
-          title: '内容',
-          isLink: '',
-          isHide: false,
-          isKeepAlive: true,
-          isAffix: false,
-          isIframe: false,
-          roles: ['admin','common'],
-          icon: 'ele-Van',
-        },
-        children: [
-          {
-            path: '/content/index',
-            name: 'contentIndex',
-            component: () => import('@/views/content/index.vue'),
-            meta: {
-              title: '内容管理',
-              isLink: '',
-              isHide: false,
-              isKeepAlive: true,
-              isAffix: false,
-              isIframe: false,
-              roles: ['admin','common'],
-              icon: 'ele-Van',
-            }
-          },
-        ],
-      },
+      //  //indicator
+      // {
+      //   path: '/indicator',
+      //   name: 'indicator',
+      //   component: () => import('@/layout/routerView/parent.vue'),
+      //   redirect: '/indicator/index',
+      //   meta: {
+      //     title: '指标',
+      //     isLink: '',
+      //     isHide: false,
+      //     isKeepAlive: true,
+      //     isAffix: false,
+      //     isIframe: false,
+      //     roles: ['admin','common'],
+      //     icon: 'ele-Switch',
+      //   },
+      //   children: [
+      //     {
+      //       path: '/indicator/index',
+      //       name: 'indicatorIndex',
+      //       component: () => import('@/views/indicator/index.vue'),
+      //       meta: {
+      //         title: '指标管理',
+      //         isLink: '',
+      //         isHide: false,
+      //         isKeepAlive: true,
+      //         isAffix: false,
+      //         isIframe: false,
+      //         roles: ['admin','common'],
+      //         icon: 'ele-Switch',
+      //       }
+      //     }
+      //   ],
+      // },
+      //  //element
+      // {
+      //   path: '/element',
+      //   name: 'element',
+      //   component: () => import('@/layout/routerView/parent.vue'),
+      //   redirect: '/element/index',
+      //   meta: {
+      //     title: '要素',
+      //     isLink: '',
+      //     isHide: false,
+      //     isKeepAlive: true,
+      //     isAffix: false,
+      //     isIframe: false,
+      //     roles: ['admin','common'],
+      //     icon: 'ele-Orange',
+      //   },
+      //   children: [
+      //     {
+      //       path: '/element/index',
+      //       name: 'elementIndex',
+      //       component: () => import('@/views/element/index.vue'),
+      //       meta: {
+      //         title: '要素管理',
+      //         isLink: '',
+      //         isHide: false,
+      //         isKeepAlive: true,
+      //         isAffix: false,
+      //         isIframe: false,
+      //         roles: ['admin','common'],
+      //         icon: 'ele-Orange',
+      //       }
+      //     },
+      //   ],
+      // },
+      //  //content
+      // {
+      //   path: '/content',
+      //   name: 'content',
+      //   component: () => import('@/layout/routerView/parent.vue'),
+      //   redirect: '/content/index',
+      //   meta: {
+      //     title: '内容',
+      //     isLink: '',
+      //     isHide: false,
+      //     isKeepAlive: true,
+      //     isAffix: false,
+      //     isIframe: false,
+      //     roles: ['admin','common'],
+      //     icon: 'ele-Van',
+      //   },
+      //   children: [
+      //     {
+      //       path: '/content/index',
+      //       name: 'contentIndex',
+      //       component: () => import('@/views/content/index.vue'),
+      //       meta: {
+      //         title: '内容管理',
+      //         isLink: '',
+      //         isHide: false,
+      //         isKeepAlive: true,
+      //         isAffix: false,
+      //         isIframe: false,
+      //         roles: ['admin','common'],
+      //         icon: 'ele-Van',
+      //       }
+      //     },
+      //   ],
+      // },
       {
         path: '/member',
         name: 'member',
         component: () => import('@/layout/routerView/parent.vue'),
         redirect: '/member/index',
         meta: {
-          title: '用户',
+          title: '用户管理',
           isLink: '',
           isHide: false,
           isKeepAlive: true,
@@ -344,7 +344,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isAffix: false,
           isIframe: false,
           roles: ['admin','common'],
-          icon: 'ele-Setting',
+          icon: 'ele-Tools',
         },
         children: [
           {
@@ -359,7 +359,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isAffix: false,
               isIframe: false,
               roles: ['admin','common'],
-              icon: 'ele-Setting',
+              icon: 'ele-Tools',
             },
           }
         ],

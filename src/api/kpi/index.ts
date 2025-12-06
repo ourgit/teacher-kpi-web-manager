@@ -10,6 +10,16 @@ export function getKPIList(data?: object) {
     data,
   })
 }
+/**
+ * 获取KPI完整性
+ */
+export function getKPIListComlpeted(data?: object) {
+  return request({
+    url: '/v1/tk/kpi/is/completed/',
+    method: 'post',
+    data,
+  })
+}
 
 /**
  * 获取KPI列表（不分页）

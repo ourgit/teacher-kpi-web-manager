@@ -32,7 +32,7 @@
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="onOpenEdit(row)">修改</el-button>
             <el-button size="small" text type="primary" @click="onDelete(row)">删除</el-button>
-            <el-button size="small" text type="primary" @click="onOpenDispatch(row)">下发</el-button>
+            <el-button size="small" v-if="isCompleted(row.id)" text type="primary" @click="onOpenDispatch(row)">下发</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, onMounted, ref, toRefs } from 'vue'
-import { getKPIList } from '@/api/kpi/index'
+import { getKPIList,getKPIListComlpeted } from '@/api/kpi/index'
 
 
 // 引入组件
@@ -93,7 +93,8 @@ const state = reactive({
   } as any,
   submitData: {},
   levelList: [] as any,
-  totalBalance: 0
+  totalBalance: 0,
+  completedList:[] as any,
 })
 
 const { list, loading, currentPage, totalPage, queryData, levelList, totalBalance } = toRefs(state)
@@ -119,6 +120,26 @@ const getListData = () => {
   }).catch(() => {
     state.loading = false
   })
+  if(state.completedList.length === 0){
+    getKPIComlpeted();
+  }
+}
+
+const getKPIComlpeted=()=>{
+  getKPIListComlpeted({})
+  .then((data:any)=>{
+    state.completedList=data.list;
+  }).catch((e:any)=>{
+    console.error("出错:"+e)
+  })
+}
+
+const isCompleted=(id:any)=>{
+  if(state.completedList.length!=0){
+    const kpi=state.completedList.find((item:any) => item.kpiId === id);
+    return kpi?.isCompleted;
+  }
+  return false;
 }
 
 const onOpenDispatch =(row:any)=>{
