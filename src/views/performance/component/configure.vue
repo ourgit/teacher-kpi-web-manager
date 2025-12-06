@@ -273,6 +273,9 @@
         <el-form-item label="附属名称" prop="subName">
           <el-input v-model="indicatorDialog.form.subName" placeholder="请输入附属名称" />
         </el-form-item>
+        <el-form-item label="最高分" prop="subName">
+          <el-input v-model="indicatorDialog.form.score" placeholder="请输入最高分" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -424,6 +427,7 @@ const indicatorDialog = reactive({
     indicatorName: '',
     subName: '',
     kpiId: '',
+    score: 0,
   },
   rules: {
     indicatorName: [{ required: true, message: '请输入指标名称', trigger: 'blur' }],
@@ -661,6 +665,7 @@ const openIndicatorDialog = (mode: 'add' | 'edit', indicator?: any) => {
     indicatorName: indicator?.indicatorName || '',
     subName: indicator?.subName || '',
     kpiId: state.formData.kpiId,
+    score: indicator?.score || 0,
   }
   nextTick(() => indicatorFormRef.value?.clearValidate())
 }

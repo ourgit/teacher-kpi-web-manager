@@ -137,6 +137,7 @@ const getListData = () => {
     if (state.currentPage === 1 && data.pages > 0) {
       state.totalPage = data.pages
     }
+    console.log("data",data)
     state.submitData = JSON.parse(JSON.stringify(state.queryData))
   }).catch(() => {
     state.loading = false
