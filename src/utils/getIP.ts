@@ -1,1 +1,1 @@
-export const fileIPLocate="http://120.48.81.209"
+export const fileIPLocate="https://120.48.81.209"

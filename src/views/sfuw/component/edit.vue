@@ -3,7 +3,7 @@
     <el-dialog
       title="修改标准"
       v-model="isShowDialog"
-      width="600px"
+      width="1000px"
       :close-on-click-modal="false"
       :destroy-on-close="true"
       @closed="handleDialogClosed"

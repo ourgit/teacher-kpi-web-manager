@@ -56,7 +56,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: true,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer','admin','common'],
           icon: 'iconfont icon-zhuye',
         },
       },
@@ -73,7 +73,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer','admin','common'],
           icon: 'ele-Notebook',
         },
         children: [
@@ -88,7 +88,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin','common'],
+              roles: ['developer','admin','common'],
               icon: 'ele-Notebook',
             }
           },
@@ -103,7 +103,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin','common'],
+              roles: ['developer','admin','common'],
               icon: 'ele-Notebook',
             }
           },{
@@ -117,7 +117,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin','common'],
+              roles: ['developer','admin','common'],
               icon: 'ele-User',
             },
           },
@@ -134,7 +134,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer','admin','common'],
           icon: 'ele-Grid',
         }
       },
@@ -149,7 +149,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: false,
           isAffix: false,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer','admin','common'],
           icon: 'ele-Setting',
         }
       },
@@ -267,7 +267,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin'],
+          roles: ['developer','admin'],
           icon: 'ele-User',
         },
         children: [
@@ -282,7 +282,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['developer','admin'],
               icon: 'ele-User',
             },
           },{
@@ -296,7 +296,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['developer','admin'],
               icon: 'ele-User',
             },
           },{
@@ -310,7 +310,22 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin'],
+              roles: ['developer','admin'],
+              icon: 'ele-User',
+            },
+          },
+          {
+            path: '/member/resetPassword',
+            name: 'memberResetPassword',
+            component: () => import('@/views/member/resetPassword/index.vue'),
+            meta: {
+              title: '重置密码',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['developer','admin'],
               icon: 'ele-User',
             },
           }
@@ -327,7 +342,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: false,
           isAffix: false,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer','admin','common'],
           icon: 'ele-Setting',
         }
       },
@@ -337,13 +352,13 @@ export const localRoutes: Array<RouteRecordRaw> = [
         component: () => import('@/layout/routerView/tool.vue'),
         redirect: '/tool/json',
         meta: {
-          title: '工具',
+          title: '评分方式',
           isLink: '',
           isHide: false,
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer','admin','common'],
           icon: 'ele-Tools',
         },
         children: [
@@ -358,7 +373,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin','common'],
+              roles: ['developer','admin','common'],
               icon: 'ele-Tools',
             },
           }
@@ -371,13 +386,13 @@ export const localRoutes: Array<RouteRecordRaw> = [
         component: () => import('@/layout/routerView/parent.vue'),
         redirect: '/file/index',
         meta: {
-          title: '文件',
+          title: '文件列表',
           isLink: '',
           isHide: false,
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer'],
           icon: 'ele-Document',
         },
         children: [
@@ -392,7 +407,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin','common'],
+              roles: ['developer'],
               icon: 'ele-Document',
             }
           },
@@ -411,7 +426,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
           isKeepAlive: true,
           isAffix: false,
           isIframe: false,
-          roles: ['admin','common'],
+          roles: ['developer'],
           icon: 'ele-Pear',
         },
         children: [
@@ -426,7 +441,7 @@ export const localRoutes: Array<RouteRecordRaw> = [
               isKeepAlive: true,
               isAffix: false,
               isIframe: false,
-              roles: ['admin','common'],
+              roles: ['developer'],
               icon: 'ele-Pear',
             }
           },
