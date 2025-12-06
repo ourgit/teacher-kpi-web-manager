@@ -17,6 +17,12 @@
           </el-button>
         </el-form-item>
       </el-form>
+
+      <!--给用户对于完整/不完整的解释-->
+      <div class="explain-container">
+        <el-tag size="small" type="info">完整：KPI配置完整，可以进行配置</el-tag>
+        <el-tag size="small" type="info">不完整：KPI配置不完整，需要完善配置</el-tag>
+      </div>
       <div 
         v-loading="loading" 
         class="card-container scroll-container"
@@ -30,7 +36,15 @@
           <template #header>
             <div class="card-header">
               <span class="card-title">{{ item.title || '未命名KPI' }}</span>
-              <el-tag size="small" type="info">ID: {{ item.id }}</el-tag>
+              <div class="card-header-tags">
+                <el-tag 
+                  size="small" 
+                  :type="item.isCompleted ? 'success' : 'warning'"
+                >
+                  {{ item.isCompleted ? '完整' : '不完整' }}
+                </el-tag>
+                <el-tag size="small" type="info">ID: {{ item.id }}</el-tag>
+              </div>
             </div>
           </template>
           <div class="card-content">
@@ -44,7 +58,13 @@
             </div>
           </div>
           <div class="card-footer">
-            <el-button size="default" type="primary" @click="onConfig(item)">配置</el-button>
+            <el-button 
+              size="default" 
+              type="primary" 
+              @click="onConfig(item)"
+            >
+              配置
+            </el-button>
           </div>
         </el-card>
         <div v-if="list.length === 0 && !loading" class="empty-state">
@@ -57,8 +77,10 @@
 
 <script setup lang="ts">
 import { reactive, onMounted, toRefs } from 'vue'
-import { getKPIListAll } from '@/api/kpi/index'
+import { getKPIListAll, getKPIListComlpeted } from '@/api/kpi/index'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+
 const router = useRouter()
 
 // 定义变量
@@ -67,16 +89,15 @@ const state = reactive({
   loading: false,
   queryData: {
     id: '',
-    title:'',
-    createTime:'',
-    endTime:'',
+    title: '',
+    createTime: '',
+    endTime: '',
   } as any,
   submitData: {},
-  levelList: [] as any,
-  totalBalance: 0
+  completedList: [] as any[],
 })
 
-const { list, loading, queryData, levelList, totalBalance } = toRefs(state)
+const { list, loading, queryData } = toRefs(state)
 
 // 获取列表
 const getListData = () => {
@@ -91,8 +112,23 @@ const getListData = () => {
   getKPIListAll({
     ...formData,
   }).then((data: any) => {
+    console.log(data)
     state.loading = false
     state.list = data.list || []
+
+    //获取KPI完整性,根据id对应上去，在list中多加isCompleted字段
+    getKPIListComlpeted({})
+    .then((data:any)=>{
+      state.completedList=data.list;
+      state.completedList.forEach((item:any) => {
+        const kpi=state.list.find((kpi:any) => kpi.id === item.kpiId);
+        if(kpi){
+          kpi.isCompleted=item.isCompleted;
+        }
+      })
+    })
+
+    console.log(state.completedList)
     state.submitData = JSON.parse(JSON.stringify(state.queryData))
   }).catch(() => {
     state.loading = false
@@ -101,6 +137,12 @@ const getListData = () => {
 
 // 配置按钮 - 跳转到配置页面
 const onConfig = (row: any) => {
+  // 如果KPI不完整，提示用户完善配置
+/*   if (!row.isCompleted) {
+    ElMessage.warning('请先完善KPI配置')
+    return
+  } */
+  
   router.push({
     path: '/performance/configure',
     query: {
@@ -235,4 +277,13 @@ onMounted(() => {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+.explain-container{
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+}
+
 </style>
