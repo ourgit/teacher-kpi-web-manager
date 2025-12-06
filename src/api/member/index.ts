@@ -343,3 +343,14 @@ export function getElementListById(data: object) {
     data,
   })
 }
+
+/**
+ * 重置登录密码
+ */
+export function resetLoginPassword(data: { phone: string; newPassword: string }) {
+  return request({
+    url: '/v1/tk/reset_login_password/',
+    method: 'post',
+    data,
+  })
+}

@@ -313,6 +313,21 @@ export const localRoutes: Array<RouteRecordRaw> = [
               roles: ['developer','admin'],
               icon: 'ele-User',
             },
+          },
+          {
+            path: '/member/resetPassword',
+            name: 'memberResetPassword',
+            component: () => import('@/views/member/resetPassword/index.vue'),
+            meta: {
+              title: '重置密码',
+              isLink: '',
+              isHide: false,
+              isKeepAlive: true,
+              isAffix: false,
+              isIframe: false,
+              roles: ['developer','admin'],
+              icon: 'ele-User',
+            },
           }
         ],
       },

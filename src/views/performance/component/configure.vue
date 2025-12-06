@@ -147,7 +147,6 @@
             <el-tag type="primary">内容数：{{ contentTotal }}</el-tag>
           </div>
           <div class="search-toolbar__actions">
-            <el-button size="small" type="primary" @click="triggerSearch">搜索全部</el-button>
             <el-button size="small" @click="clearSearch">清空</el-button>
           </div>
         </div>
@@ -835,19 +834,28 @@ onMounted(() => {
   }
   
   .drawer-test-page {
+    padding: 20px;
+    
     h3 {
-      margin: 0 0 12px;
-    }
-    p {
       margin: 0 0 16px;
-      color: var(--el-text-color-secondary);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--el-text-color-primary);
     }
+    
+    .el-alert {
+      margin-bottom: 20px;
+    }
+    
     .search-toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin: 12px 0;
+      margin: 20px 0;
+      padding: 12px 16px;
+      background: var(--el-bg-color-page);
+      border-radius: 6px;
 
       &__left {
         display: flex;
@@ -864,29 +872,52 @@ onMounted(() => {
     }
 
     .search-tip {
-      margin: 0 0 12px;
-      color: var(--el-text-color-secondary);
+      margin: 0 0 20px;
+      padding: 8px 12px;
+      background: var(--el-color-info-light-9);
+      border-left: 3px solid var(--el-color-info);
+      border-radius: 4px;
+      color: var(--el-text-color-regular);
+      font-size: 13px;
+      line-height: 1.6;
     }
 
     .search-section {
-      margin-bottom: 16px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: var(--el-bg-color);
+      border-radius: 8px;
+      border: 1px solid var(--el-border-color-lighter);
     }
+    
     .search-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       font-weight: 600;
     }
+    
     .search-action {
       flex: 0 0 clamp(220px, 40vw, 360px);
     }
+    
     .search-result {
       background: var(--el-bg-color-page);
       border: 1px solid var(--el-border-color-lighter);
       border-radius: 6px;
-      padding: 12px;
+      padding: 16px;
+      margin-top: 12px;
+      min-height: 100px;
+    }
+    
+    .el-divider {
+      margin: 24px 0;
+    }
+    
+    .el-empty {
+      padding: 40px 20px;
     }
   }
   

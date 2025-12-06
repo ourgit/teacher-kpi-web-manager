@@ -3,12 +3,12 @@
     <el-card shadow="hover" class="layout-padding-auto">
       <el-form class="query" :inline="true">
         <el-form-item>
-          <el-button size="default" type="primary" @click="getListData">
+<!--           <el-button size="default" type="primary" @click="getListData">
             <el-icon>
               <ele-Search />
             </el-icon>
             查询
-          </el-button>
+          </el-button> -->
           <el-button size="success" type="primary" @click="onOpenAdd">
             <el-icon>
               <ele-Plus />
