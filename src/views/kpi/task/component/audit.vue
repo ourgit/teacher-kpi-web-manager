@@ -125,6 +125,7 @@ const state = reactive({
   elementList: [] as any,
   isShowDialog: false,
   status:0,
+  flag:true,
 })
 
 const { loading, ruleForm, rules, isShowDialog } = toRefs(state)
@@ -230,7 +231,8 @@ const onCancel = () => {
 }
 
 const onSubmit = () => {
-  if(state.status!=3){
+  if(state.flag){
+    state.flag=false
     // 重新收集最新的最终分数，以字符串格式的浮点数传递
     state.ruleForm.data = []
     state.elementList.forEach((element:any)=>{
@@ -243,26 +245,22 @@ const onSubmit = () => {
       })
     })
     state.loading = true
-      addLeaderScore(state.ruleForm)
-        .then(() => {
-          ElMessage({
-            message: '审批成功',
-            type: 'success',
-          })
-          state.loading = false
-          closeDialog()
-          emit('refresh')
-        })
-        .catch(() => {
-          state.loading = false
-        })
-  }else{
-    ElMessage({
-            message: '已提交',
-            type: 'success',
-          })
+    addLeaderScore(state.ruleForm)
+    .then(() => {
+      ElMessage({
+        message: '审批成功',
+        type: 'success',
+      })
+      state.loading = false
+      closeDialog()
+      emit('refresh')
+    })
+    .catch(() => {
+      state.loading = false
+    })
+    state.flag=true
   }
-      
+    
 }
 
 defineExpose({
