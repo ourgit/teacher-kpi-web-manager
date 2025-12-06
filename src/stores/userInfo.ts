@@ -35,6 +35,9 @@ export const useUserInfo = defineStore('userInfo', {
             if(response.role.nickName == '管理员'){
               this.userInfos.roles = ['admin']
             }
+            else if(response.role.nickName == '开发人员'){
+              this.userInfos.roles = ['developer']
+            }
             else{
               this.userInfos.roles = ['common']
             }
